@@ -1,0 +1,46 @@
+:root {
+  --clr-snow-white: rgb(252, 252, 252);
+  --clr-off-white: rgb(242, 242, 242);
+  --clr-light-gray: rgb(188, 206, 217);
+  --clr-light-grayish-blue: rgb(113, 145, 165);
+  --clr-light-blue: rgb(99, 149, 184);
+  --clr-gray: rgb(48, 72, 89);
+  --clr-dark-gray: rgb(21, 41, 56);
+  --clr-orange: rgb(253, 162, 20);
+}
+
+* {
+  font-family: 'Atkinson Hyperlegible', sans-serif;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background-repeat: no-repeat;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+  height: auto;
+}
+
+ul,
+li {
+  list-style: none;
+}
+
+a {
+  text-decoration: none;
+}
+
+button {
+  display: block;
+  outline: none;
+  border: none;
+  cursor: pointer;
+}
+
+a,
+button,
+svg {
+  transition: all 0.3s;
+}
