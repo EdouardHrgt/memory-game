@@ -1,4 +1,22 @@
-<script setup></script>
+<script setup>
+import { ref, computed } from 'vue';
+
+const settings = ref({
+  theme: 'numbers',
+  players: 1,
+  grid: 0,
+});
+
+const params = computed(() => {
+  return JSON.stringify(settings.value);
+});
+
+function ChooseSettings(prop, choice) {
+  if (prop == 'theme') settings.value.theme = choice;
+  if (prop == 'players') settings.value.players = choice;
+  if (prop == 'grid') settings.value.grid = choice;
+}
+</script>
 
 <template>
   <main>
@@ -8,26 +26,41 @@
         fill-rule="nonzero"
       />
     </svg>
+    <h1>{{ settings }}</h1>
     <section class="card">
       <div class="container">
         <h2>Select Theme</h2>
-        <div class="btn-wrapper"><button>Numbers</button> <button class="active">Animals</button></div>
+        <div class="btn-wrapper">
+          <button @click="ChooseSettings('theme', 'numbers')">Numbers</button>
+          <button class="active" @click="ChooseSettings('theme', 'animals')">Animals</button>
+        </div>
       </div>
       <div class="container">
         <h2>Numbers of Players</h2>
         <div class="btn-wrapper">
-          <button class="active">1</button>
-          <button>2</button>
-          <button>3</button>
-          <button>4</button>
+          <button class="active" @click="ChooseSettings('players', 1)">1</button>
+          <button @click="ChooseSettings('players', 2)">2</button>
+          <button @click="ChooseSettings('players', 3)">3</button>
+          <button @click="ChooseSettings('players', 4)">4</button>
         </div>
       </div>
       <div class="container">
         <h2>Grid Size</h2>
-        <div class="btn-wrapper"><button class="active">4*4</button> <button>6*6</button></div>
+        <div class="btn-wrapper">
+          <button class="active" @click="ChooseSettings('grid', 0)">4*4</button>
+          <button @click="ChooseSettings('grid', 1)">6*6</button>
+        </div>
       </div>
 
-      <button class="start">Start Game</button>
+      <router-link
+        :to="{
+          path: '/Play',
+          query: {
+            params,
+          },
+        }"
+        ><button class="start">Start Game</button></router-link
+      >
     </section>
   </main>
 </template>

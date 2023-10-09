@@ -44,3 +44,13 @@ button,
 svg {
   transition: all 0.3s;
 }
+
+.flex {
+  display: flex;
+}
+
+.flex-all{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
