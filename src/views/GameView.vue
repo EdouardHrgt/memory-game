@@ -29,7 +29,11 @@ function reset() {
   // mask all buttons content (default style)
   const buttons = document.querySelectorAll('.grid-btn');
   buttons.forEach((btn) => {
-    btn.classList.add('hidden');
+    if (btn.classList.contains('validate')) {
+      return;
+    } else {
+      btn.classList.add('hidden');
+    }
   });
   clickedElements.value = [];
 }
@@ -38,6 +42,8 @@ function reset() {
 const clickedElements = ref([]);
 //Cancel the ability to clic on more than 2 button per rounds
 const isClickable = ref(true);
+//Stocking winning pairs
+const winningPairs = ref([]);
 
 // Game Logic
 function game(event, i) {
@@ -59,14 +65,15 @@ function game(event, i) {
 
       if (element1.value === element2.value) {
         // If the values match, apply the "validate" class and remove the "hidden" class
+        winningPairs.value.push(element1.value);
         const buttons = document.querySelectorAll('.grid-btn');
         buttons.forEach((btn) => {
           if (btn.value === element1.value) {
             btn.classList.remove('hidden');
             btn.classList.add('validate');
           }
-          
         });
+        reset();
       } else {
         // If the values don't match, hide the buttons again
         reset();
@@ -88,6 +95,7 @@ function game(event, i) {
           fill-rule="nonzero"
         />
       </svg>
+      {{ winningPairs }}
       <div class="btn-wrapper flex">
         <button class="restart">Restart</button>
         <button class="new" @click="backHome()">New Game</button>
