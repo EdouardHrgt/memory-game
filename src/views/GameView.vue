@@ -1,14 +1,16 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+
 const route = useRoute();
 const router = useRouter();
-
 const settings = JSON.parse(route.query.params);
+
 function backHome() {
   router.push('/');
 }
 
+//generatin the numbers in the grid (4*4 or 6*6) including duplicate and randomization
 function gridGenerator() {
   let x;
   if (settings.grid == 0) x = 7;
@@ -20,7 +22,60 @@ function gridGenerator() {
 
   return shuffledArray;
 }
+//Use grid to generate the html grid
 const grid = ref(gridGenerator());
+
+function reset() {
+  // mask all buttons content (default style)
+  const buttons = document.querySelectorAll('.grid-btn');
+  buttons.forEach((btn) => {
+    btn.classList.add('hidden');
+  });
+  clickedElements.value = [];
+}
+
+// Save clicked elements (max 2 per round)
+const clickedElements = ref([]);
+//Cancel the ability to clic on more than 2 button per rounds
+const isClickable = ref(true);
+
+// Game Logic
+function game(event, i) {
+  //Disable clic if 2 elements are already clicked
+  if (!isClickable.value) {
+    return;
+  }
+
+  event.target.classList.remove('hidden');
+  const value = event.target.value;
+  clickedElements.value.push({ value, index: i });
+  const round = clickedElements.value.length === 2;
+
+  // If player round completed, we block clicking event, Wait 1sec and hide buttons content again then allow a new round
+  if (round) {
+    isClickable.value = false;
+    setTimeout(() => {
+      const [element1, element2] = clickedElements.value;
+
+      if (element1.value === element2.value) {
+        // If the values match, apply the "validate" class and remove the "hidden" class
+        const buttons = document.querySelectorAll('.grid-btn');
+        buttons.forEach((btn) => {
+          if (btn.value === element1.value) {
+            btn.classList.remove('hidden');
+            btn.classList.add('validate');
+          }
+          
+        });
+      } else {
+        // If the values don't match, hide the buttons again
+        reset();
+      }
+
+      isClickable.value = true;
+    }, 1000);
+  }
+}
 </script>
 
 <template>
@@ -39,7 +94,7 @@ const grid = ref(gridGenerator());
       </div>
     </header>
     <section class="grid" :class="{ 'large-grid': settings.grid == 1, 'small-grid': settings.grid == 0 }">
-      <button class="grid-btn" v-for="el in grid" :key="el">{{ el }}</button>
+      <button class="grid-btn hidden" v-for="(el, i) in grid" :key="el" :value="el" @click="game($event, i)">{{ el }}</button>
     </section>
   </main>
 </template>
@@ -83,8 +138,8 @@ header {
   margin-inline: auto;
   border: 2px solid hotpink;
   display: grid;
-  grid-column-gap: 1rem;
-  grid-row-gap: 1rem;
+  grid-column-gap: 1.2rem;
+  grid-row-gap: 1.2rem;
   padding: 1rem;
 }
 
@@ -114,7 +169,7 @@ header {
 
 .hidden {
   background-color: var(--clr-gray);
-  color: transparent;
+  color: lightslategray;
   animation: hide 0.4s ease-in-out forwards;
 }
 

@@ -1,0 +1,22 @@
+// Game Logic
+function game(event, i) {
+  //Disable clic if 2 elements are already clicked
+  if (!isClickable.value) {
+    return;
+  }
+
+  event.target.classList.remove('hidden');
+  const value = event.target.value;
+  clickedElements.value.push({ value, index: i });
+  const round = clickedElements.value.length === 2;
+
+  // If player round completed, we block clicking event, Wait 1sec and hide buttons content again then allow a new round
+  if (round) {
+    isClickable.value = false;
+    setTimeout(() => {
+      
+      reset();
+      isClickable.value = true;
+    }, 1000);
+  }
+}
