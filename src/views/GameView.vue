@@ -78,8 +78,11 @@ function game(event, i) {
   if (!isClickable.value) {
     return;
   }
+
   playSound(clicSound);
+
   event.target.classList.remove('hidden');
+
   let value;
 
   if (settings.theme === 'animals') {
@@ -102,9 +105,7 @@ function game(event, i) {
         // If the values match, apply the "validate" class and remove the "hidden" class
         playSound(WinSound);
         winningPairs.value.push(element1.value);
-        if (winningPairs.value.length === grid.value.length / 2) {
-          isWin.value = true;
-        }
+
         if (settings.theme === 'animals') {
           const images = document.querySelectorAll('.img-btn');
           images.forEach((img) => {
@@ -121,6 +122,10 @@ function game(event, i) {
             btn.classList.add('validate');
           }
         });
+        // Check if the game is over
+        if (winningPairs.value.length === grid.value.length / 2) {
+          isWin.value = true;
+        }
         reset();
       } else {
         playSound(LooseSound);
@@ -155,12 +160,12 @@ function game(event, i) {
         :class="{ 'large-grid': settings.grid == 1, 'small-grid': settings.grid == 0 }"
         v-if="settings.theme === 'numbers'"
       >
-        <div class="win-modal" v-if="isWin">
-          <h1>GG <br />You win!</h1>
-        </div>
         <button class="grid-btn hidden" v-for="(el, i) in grid" :key="el" :value="el" @click="game($event, i)">
           {{ el }}
         </button>
+        <div class="win-modal" v-if="isWin">
+          <h1>GG <br />You win!</h1>
+        </div>
       </div>
       <div
         class="grid"
@@ -176,6 +181,9 @@ function game(event, i) {
           :src="getImageUrl(el.img)"
           :alt="el.value"
         />
+        <div class="win-modal" v-if="isWin">
+          <h1>GG <br />You win!</h1>
+        </div>
       </div>
     </section>
     <footer>
@@ -190,7 +198,7 @@ function game(event, i) {
 <style scoped>
 main {
   width: 100%;
-  height: 100dvh;
+  min-height: 100dvh;
   --max-w: 1024px;
   background-color: var(--clr-dark-gray);
 }
@@ -281,8 +289,8 @@ header {
 
 .hidden {
   background-color: var(--clr-gray);
-  /* color: rgb(86, 97, 109); */
-  color: transparent;
+  color: rgb(86, 97, 109);
+  /* color: transparent; */
   animation: hide 0.4s ease-in-out forwards;
 }
 
@@ -341,6 +349,61 @@ footer p {
   }
   to {
     transform: scale(1);
+  }
+}
+
+@media screen and (max-width: 1440px) {
+  main {
+    --max-w: 100%;
+  }
+  header {
+    max-width: var(--max-w);
+    margin-inline: auto;
+    padding: 6rem 7vw 4rem;
+  }
+}
+
+@media screen and (max-width: 800px) {
+  header {
+    padding: 3rem 3rem 1rem;
+    flex-direction: column-reverse;
+    gap: 3rem;
+  }
+  .grid {
+    padding: 1.5rem 0.5rem 0;
+    grid-column-gap: 1rem;
+    grid-row-gap: 1rem;
+  }
+
+  .small-grid {
+    --btn-w: 70px;
+  }
+
+  .large-grid {
+    --btn-w: 48px;
+  }
+  .grid-btn {
+    font-size: 38px;
+  }
+  .btn-wrapper button {
+    padding: 0.7rem 1.5rem;
+    font-size: 18px;
+  }
+  footer {
+    padding: 2.3rem 0.5rem;
+  }
+
+  .rounds {
+    padding: 1rem;
+    width: fit-content;
+  }
+
+  h3 {
+    font-size: 1.7rem;
+  }
+
+  footer p {
+    font-size: 1.7rem;
   }
 }
 </style>

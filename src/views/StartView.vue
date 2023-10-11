@@ -33,20 +33,18 @@ function ChooseSettings(prop, choice) {
           <button @click="ChooseSettings('theme', 'numbers')" :class="{ active: settings.theme === 'numbers' }">Numbers</button>
           <button @click="ChooseSettings('theme', 'animals')" :class="{ active: settings.theme === 'animals' }">
             Animals
-            <p class="error" v-if="settings.theme === 'animals'">..Bugged...</p>
           </button>
         </div>
       </div>
       <div class="container">
         <h2 class="flex-align">
           Numbers of Players
-          <p class="error">...Not implemented... :(</p>
+          <p class="error">Not implemented</p>
         </h2>
         <div class="btn-wrapper">
           <button @click="ChooseSettings('players', 1)" :class="{ active: settings.players === 1 }">1</button>
           <button @click="ChooseSettings('players', 2)" :class="{ active: settings.players === 2 }">2</button>
-          <button @click="ChooseSettings('players', 3)" :class="{ active: settings.players === 3 }">3</button>
-          <button @click="ChooseSettings('players', 4)" :class="{ active: settings.players === 4 }">4</button>
+
         </div>
       </div>
       <div class="container">
@@ -120,13 +118,6 @@ button {
   background-color: var(--clr-light-grayish-blue);
   padding: 0.15rem 2.4rem;
   position: relative;
-}
-
-button .error {
-  position: absolute;
-  top: -1.2rem;
-  left: 50%;
-  transform: translateX(-50%);
 }
 
 button:hover {
