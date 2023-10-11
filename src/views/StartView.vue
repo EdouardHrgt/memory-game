@@ -31,11 +31,17 @@ function ChooseSettings(prop, choice) {
         <h2>Select Theme</h2>
         <div class="btn-wrapper">
           <button @click="ChooseSettings('theme', 'numbers')" :class="{ active: settings.theme === 'numbers' }">Numbers</button>
-          <button @click="ChooseSettings('theme', 'animals')" :class="{ active: settings.theme === 'animals' }">Animals</button>
+          <button @click="ChooseSettings('theme', 'animals')" :class="{ active: settings.theme === 'animals' }">
+            Animals
+            <p class="error" v-if="settings.theme === 'animals'">..Bugged...</p>
+          </button>
         </div>
       </div>
       <div class="container">
-        <h2 class="flex-align">Numbers of Players <p class="error"> ! Not implemented yet ! :(</p></h2>
+        <h2 class="flex-align">
+          Numbers of Players
+          <p class="error">...Not implemented... :(</p>
+        </h2>
         <div class="btn-wrapper">
           <button @click="ChooseSettings('players', 1)" :class="{ active: settings.players === 1 }">1</button>
           <button @click="ChooseSettings('players', 2)" :class="{ active: settings.players === 2 }">2</button>
@@ -46,7 +52,7 @@ function ChooseSettings(prop, choice) {
       <div class="container">
         <h2>Grid Size</h2>
         <div class="btn-wrapper">
-          <button  @click="ChooseSettings('grid', 0)" :class="{ active: settings.grid === 0 }">4*4</button>
+          <button @click="ChooseSettings('grid', 0)" :class="{ active: settings.grid === 0 }">4*4</button>
           <button @click="ChooseSettings('grid', 1)" :class="{ active: settings.grid === 1 }">6*6</button>
         </div>
       </div>
@@ -113,6 +119,14 @@ button {
   border-radius: 6rem;
   background-color: var(--clr-light-grayish-blue);
   padding: 0.15rem 2.4rem;
+  position: relative;
+}
+
+button .error {
+  position: absolute;
+  top: -1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 button:hover {
