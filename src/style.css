@@ -28,6 +28,12 @@ li {
   list-style: none;
 }
 
+.error {
+  font-size: 13px;
+  color: rgb(255, 58, 58);
+  font-style: italic;
+}
+
 a {
   text-decoration: none;
 }
@@ -49,7 +55,13 @@ svg {
   display: flex;
 }
 
-.flex-all{
+.flex-align {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.flex-all {
   display: flex;
   align-items: center;
   justify-content: space-between;

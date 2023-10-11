@@ -1,29 +1,81 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
+import { animals } from '../composables/animals';
+import clicSound from '../assets/audio/click.mp3';
+import WinSound from '../assets/audio/win.wav';
+import LooseSound from '../assets/audio/loose.mp3';
 
 const route = useRoute();
 const router = useRouter();
 const settings = JSON.parse(route.query.params);
+const animalsList = animals();
+const grid = ref([]);
+
+function playSound(music) {
+  const audio = new Audio(music);
+  audio.play();
+}
 
 function backHome() {
   router.push('/');
 }
 
-//generatin the numbers in the grid (4*4 or 6*6) including duplicate and randomization
-function gridGenerator() {
-  let x;
-  if (settings.grid == 0) x = 7;
-  if (settings.grid == 1) x = 17;
+function restart() {
+  hardReset();
+  winningPairs.value = [];
+}
 
+function getImageUrl(name) {
+  return new URL(`../assets/animals/${name}`, import.meta.url).href;
+}
+
+// Generating the numbers grid
+function generateNumberGrid(x) {
   const originalArray = Array.from({ length: x + 1 }, (_, index) => index);
   const duplicatedArray = originalArray.flatMap((number) => [number, number]);
   const shuffledArray = duplicatedArray.sort(() => Math.random() - 0.5);
-
   return shuffledArray;
 }
-//Use grid to generate the html grid
-const grid = ref(gridGenerator());
+// Generating the animals grid
+function generateAnimalGrid(x) {
+  // Mélanger aléatoirement la liste des animaux
+  const shuffledAnimals = animalsList.sort(() => Math.random() - 0.5);
+  // Sélectionner les x premiers animaux mélangés
+  const selectedAnimals = shuffledAnimals.slice(0, x);
+  // Dupliquer chaque animal pour créer les paires
+  const duplicatedAnimals = selectedAnimals.flatMap((animal) => [animal, { ...animal }]);
+  // Mélanger à nouveau les animaux pour obtenir l'ordre aléatoire
+  const shuffledValues = duplicatedAnimals.sort(() => Math.random() - 0.5);
+  return shuffledValues;
+}
+
+// Define Grid Size + Theme
+function generateGrid() {
+  let x;
+  if (settings.theme === 'numbers') {
+    if (settings.grid == 0) {
+      x = 7;
+    } else if (settings.grid == 1) {
+      x = 17;
+    }
+    return generateNumberGrid(x);
+  }
+
+  if (settings.theme === 'animals') {
+    if (settings.grid == 0) {
+      x = 8;
+    } else if (settings.grid == 1) {
+      x = 18;
+    }
+    return generateAnimalGrid(x);
+  }
+}
+
+onMounted(() => {
+  // Générez la grille en fonction de settings
+  grid.value = generateGrid();
+});
 
 function reset() {
   // mask all buttons content (default style)
@@ -38,6 +90,15 @@ function reset() {
   clickedElements.value = [];
 }
 
+function hardReset() {
+  const buttons = document.querySelectorAll('.grid-btn');
+  buttons.forEach((btn) => {
+    btn.classList.remove('validate');
+    btn.classList.add('hidden');
+  });
+  clickedElements.value = [];
+}
+
 // Save clicked elements (max 2 per round)
 const clickedElements = ref([]);
 //Cancel the ability to clic on more than 2 button per rounds
@@ -45,27 +106,47 @@ const isClickable = ref(true);
 //Stocking winning pairs
 const winningPairs = ref([]);
 
-// Game Logic
+//Counter of rounds
+const counter = ref(0);
+
 function game(event, i) {
-  //Disable clic if 2 elements are already clicked
+  //Disable click if 2 elements are already clicked
   if (!isClickable.value) {
     return;
   }
-
+  playSound(clicSound);
   event.target.classList.remove('hidden');
-  const value = event.target.value;
+  let value;
+
+  if (settings.theme === 'animals') {
+    value = event.target.alt;
+  } else {
+    value = event.target.value;
+  }
+
   clickedElements.value.push({ value, index: i });
   const round = clickedElements.value.length === 2;
 
   // If player round completed, we block clicking event, Wait 1sec and hide buttons content again then allow a new round
   if (round) {
     isClickable.value = false;
+    counter.value++;
     setTimeout(() => {
       const [element1, element2] = clickedElements.value;
 
       if (element1.value === element2.value) {
         // If the values match, apply the "validate" class and remove the "hidden" class
+        playSound(WinSound);
         winningPairs.value.push(element1.value);
+        if (settings.theme === 'animals') {
+          const images = document.querySelectorAll('.img-btn');
+          images.forEach((img) => {
+            if (img.alt === element1.value) {
+              img.classList.remove('hidden');
+              img.classList.add('validate');
+            }
+          });
+        }
         const buttons = document.querySelectorAll('.grid-btn');
         buttons.forEach((btn) => {
           if (btn.value === element1.value) {
@@ -75,6 +156,7 @@ function game(event, i) {
         });
         reset();
       } else {
+        playSound(LooseSound);
         // If the values don't match, hide the buttons again
         reset();
       }
@@ -95,14 +177,38 @@ function game(event, i) {
           fill-rule="nonzero"
         />
       </svg>
-      {{ winningPairs }}
+      <p class="error">Winning Pairs: {{ winningPairs }}</p>
+      <p class="error">Rounds: {{ counter }}</p>
       <div class="btn-wrapper flex">
-        <button class="restart">Restart</button>
+        <button class="restart" @click="restart()">Restart</button>
         <button class="new" @click="backHome()">New Game</button>
       </div>
     </header>
-    <section class="grid" :class="{ 'large-grid': settings.grid == 1, 'small-grid': settings.grid == 0 }">
-      <button class="grid-btn hidden" v-for="(el, i) in grid" :key="el" :value="el" @click="game($event, i)">{{ el }}</button>
+    <section>
+      <div
+        class="grid"
+        :class="{ 'large-grid': settings.grid == 1, 'small-grid': settings.grid == 0 }"
+        v-if="settings.theme === 'numbers'"
+      >
+        <button class="grid-btn hidden" v-for="(el, i) in grid" :key="el" :value="el" @click="game($event, i)">
+          {{ el }}
+        </button>
+      </div>
+      <div
+        class="grid"
+        :class="{ 'large-grid': settings.grid == 1, 'small-grid': settings.grid == 0 }"
+        v-if="settings.theme === 'animals'"
+      >
+        <img
+          class="img-btn hidden"
+          v-for="(el, i) in grid"
+          :key="el.id"
+          :value="el.value"
+          @click="game($event, i)"
+          :src="getImageUrl(el.img)"
+          :alt="el.value"
+        />
+      </div>
     </section>
   </main>
 </template>
@@ -144,7 +250,6 @@ header {
 .grid {
   max-width: fit-content;
   margin-inline: auto;
-  border: 2px solid hotpink;
   display: grid;
   grid-column-gap: 1.2rem;
   grid-row-gap: 1.2rem;
@@ -154,15 +259,17 @@ header {
 .small-grid {
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(4, 1fr);
+  --btn-w: 95px;
 }
 
 .large-grid {
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: repeat(6, 1fr);
+  --btn-w: 70px;
 }
 
 .grid-btn {
-  width: 62px;
+  width: var(--btn-w);
   aspect-ratio: 1;
   border-radius: 50%;
   background-color: var(--clr-light-gray);
@@ -175,14 +282,28 @@ header {
   position: relative;
 }
 
+.grid-btn-img {
+  position: relative;
+}
+
 .hidden {
   background-color: var(--clr-gray);
-  color: lightslategray;
+  color: rgb(86, 97, 109);
   animation: hide 0.4s ease-in-out forwards;
 }
 
 .validate {
   background-color: var(--clr-orange);
+}
+
+img {
+  width: var(--btn-w);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background-color: var(--clr-light-gray);
+  padding: 0.7rem;
+  cursor: pointer;
+  position: relative;
 }
 
 @keyframes hide {
