@@ -1,0 +1,6 @@
+
+// Modify the disappearing speed
+// save settings in local storage + sound on/off
+// add new theme
+// Add 2 players
+// Metrix : average player speed round / comparison with others
