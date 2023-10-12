@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { generateNumberGrid, generateAnimalGrid, generateGrid } from '../composables/gridGeneration';
 import clicSound from '../assets/audio/click.mp3';
@@ -11,20 +11,25 @@ const router = useRouter();
 const settings = JSON.parse(route.query.params);
 const isMuted = ref(false);
 const grid = ref([]);
-const startTime = ref(0);
-const endTime = ref(false);
-const elapsedTime = ref(0);
-const isGameActive = ref(false);
 const isMenuOpen = ref(false);
-const createGrid = generateGrid(settings);
 const GenerateNumbers = generateNumberGrid();
 const generateAnimals = generateAnimalGrid();
 
 onMounted(() => {
   // Auto Generate the Grid
-  grid.value = createGrid;
+  grid.value = generateGrid(settings);
   const soundPreference = localStorage.getItem('SoundPreference');
 });
+
+function restart() {
+  hardReset();
+  resetTime();
+  winningPairs.value = [];
+  MovesCounter.value = 0;
+  isWin.value = false;
+  toggleMenu();
+  grid.value = generateGrid(settings);
+}
 
 function toggleMenu() {
   if (isMenuOpen.value == true) {
@@ -33,6 +38,11 @@ function toggleMenu() {
     isMenuOpen.value = true;
   }
 }
+
+const startTime = ref(0);
+const endTime = ref(false);
+const elapsedTime = ref(0);
+const isGameActive = ref(false);
 
 function timeSpent() {
   startTime.value = new Date().getTime();
@@ -45,16 +55,18 @@ function updateElapsedTime() {
     const currentTime = new Date().getTime();
     elapsedTime.value = Math.floor((currentTime - startTime.value) / 1000);
 
-    if (endTime.value === true) {
+    if (endTime.value == true) {
       clearInterval(intervalId);
     }
   }, 1000);
 }
 
 function formatTime(seconds, stop = false) {
+  if (seconds < 0 || seconds > 3600) {
+    return '';
+  }
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
-  console.log(minutes + ' ***** ' + remainingSeconds);
   if (minutes === 0) {
     return `${remainingSeconds} s`;
   } else {
@@ -83,15 +95,6 @@ function toggleSound() {
 
 function backHome() {
   router.push('/');
-}
-
-function restart() {
-  hardReset();
-  resetTime();
-  winningPairs.value = [];
-  MovesCounter.value = 0;
-  isWin.value = false;
-  toggleMenu();
 }
 
 function getImageUrl(name) {
@@ -230,7 +233,7 @@ function game(event, i) {
         :class="{ 'large-grid': settings.grid == 1, 'small-grid': settings.grid == 0 }"
         v-if="settings.theme === 'numbers'"
       >
-        <button class="grid-btn hidden" v-for="(el, i) in grid" :key="el" :value="el" @click="game($event, i)">
+        <button class="grid-btn hidden" v-for="(el, i) in grid" :key="i" :value="el" @click="game($event, i)">
           {{ el }}
         </button>
         <div class="win-modal" v-if="isWin"></div>
@@ -243,7 +246,7 @@ function game(event, i) {
         <button
           class="grid-btn hidden grid-btn-animals"
           v-for="(el, i) in grid"
-          :key="el.id"
+          :key="i"
           :value="el.value"
           @click="game($event, i)"
           :style="{ backgroundImage: `url(${getImageUrl(el.img)})` }"
@@ -255,10 +258,10 @@ function game(event, i) {
     <footer>
       <div class="metrix flex-all">
         <h3>Moves</h3>
-        <p>{{ MovesCounter }}</p>
+        <p class="scale-anim">{{ MovesCounter }}</p>
       </div>
       <div class="metrix flex-all timer">
-        <p v-show="isGameActive">{{ formatTime(elapsedTime) }}</p>
+        <p v-show="isGameActive" class="scale-anim">{{ formatTime(elapsedTime) }}</p>
         <h3 v-show="!isGameActive">Time</h3>
       </div>
     </footer>
@@ -483,6 +486,10 @@ footer p {
   color: var(--clr-dark-gray);
   text-align: center;
   width: 100%;
+}
+
+.scale-anim {
+  animation: modal 0.4s forwards;
 }
 
 @media screen and (max-width: 1440px) {
