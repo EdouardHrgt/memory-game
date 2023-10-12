@@ -1,10 +1,11 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import { generateNumberGrid, generateAnimalGrid, generateGrid } from '../composables/gridGeneration';
+import { generateGrid } from '../composables/gridGeneration';
 import clicSound from '../assets/audio/click.mp3';
 import WinSound from '../assets/audio/win.wav';
 import LooseSound from '../assets/audio/loose.mp3';
+import Loader from '../components/LoaderComponent.vue';
 
 const route = useRoute();
 const router = useRouter();
@@ -12,22 +13,21 @@ const settings = JSON.parse(route.query.params);
 const isMuted = ref(false);
 const grid = ref([]);
 const isMenuOpen = ref(false);
-const GenerateNumbers = generateNumberGrid();
-const generateAnimals = generateAnimalGrid();
+const isLoading = ref(false);
 
 onMounted(() => {
   // Auto Generate the Grid
   grid.value = generateGrid(settings);
-  const soundPreference = localStorage.getItem('SoundPreference');
 });
 
 function restart() {
+  toggleLoader();
   hardReset();
   resetTime();
   winningPairs.value = [];
   MovesCounter.value = 0;
   isWin.value = false;
-  toggleMenu();
+  isMenuOpen.value = false;
   grid.value = generateGrid(settings);
 }
 
@@ -37,6 +37,13 @@ function toggleMenu() {
   } else if (isMenuOpen.value == false) {
     isMenuOpen.value = true;
   }
+}
+
+function toggleLoader() {
+  isLoading.value = true;
+  setTimeout(() => {
+    isLoading.value = false;
+  }, 2000);
 }
 
 const startTime = ref(0);
@@ -97,8 +104,8 @@ function backHome() {
   router.push('/');
 }
 
-function getImageUrl(name) {
-  return new URL(`../assets/animals/${name}`, import.meta.url).href;
+function getImageUrl(theme, name) {
+  return new URL(`../assets/${theme}/${name}`, import.meta.url).href;
 }
 
 function reset() {
@@ -237,11 +244,12 @@ function game(event, i) {
           {{ el }}
         </button>
         <div class="win-modal" v-if="isWin"></div>
+        <Loader v-show="isLoading"/>
       </div>
       <div
         class="grid"
         :class="{ 'large-grid': settings.grid == 1, 'small-grid': settings.grid == 0 }"
-        v-if="settings.theme === 'animals'"
+        v-if="settings.theme === 'animals' || settings.theme === 'monsters'"
       >
         <button
           class="grid-btn hidden grid-btn-animals"
@@ -249,10 +257,11 @@ function game(event, i) {
           :key="i"
           :value="el.value"
           @click="game($event, i)"
-          :style="{ backgroundImage: `url(${getImageUrl(el.img)})` }"
+          :style="{ backgroundImage: `url(${getImageUrl(settings.theme, el.img)})` }"
         ></button>
 
         <div class="win-modal" v-if="isWin"></div>
+        <Loader v-show="isLoading"/>
       </div>
     </section>
     <footer>

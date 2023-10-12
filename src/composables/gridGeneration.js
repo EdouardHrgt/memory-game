@@ -6,14 +6,23 @@ export function generateNumberGrid(x) {
 }
 
 import { animals } from '../composables/animals';
+import { monsters } from '../composables/monsters';
 
 export function generateAnimalGrid(x) {
-  // take random animals on every generation
-  const animalsList = animals();
-  const shuffledAnimals = animalsList.sort(() => Math.random() - 0.5);
-  const selectedAnimals = shuffledAnimals.slice(0, x);
-  const duplicatedAnimals = selectedAnimals.flatMap((animal) => [animal, { ...animal }]);
-  const shuffledValues = duplicatedAnimals.sort(() => Math.random() - 0.5);
+  const list = animals();
+  const shuffleList = list.sort(() => Math.random() - 0.5);
+  const selectedObjects = shuffleList.slice(0, x);
+  const duplicateList = selectedObjects.flatMap((animal) => [animal, { ...animal }]);
+  const shuffledValues = duplicateList.sort(() => Math.random() - 0.5);
+  return shuffledValues;
+}
+
+export function generateMonstersGrid(x) {
+  const list = monsters();
+  const shuffleList = list.sort(() => Math.random() - 0.5);
+  const selectedObjects = shuffleList.slice(0, x);
+  const duplicateList = selectedObjects.flatMap((animal) => [animal, { ...animal }]);
+  const shuffledValues = duplicateList.sort(() => Math.random() - 0.5);
   return shuffledValues;
 }
 
@@ -35,5 +44,14 @@ export function generateGrid(settings) {
       x = 18;
     }
     return generateAnimalGrid(x);
+  }
+
+  if (settings.theme === 'monsters') {
+    if (settings.grid == 0) {
+      x = 8;
+    } else if (settings.grid == 1) {
+      x = 18;
+    }
+    return generateMonstersGrid(x);
   }
 }

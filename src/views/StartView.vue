@@ -33,6 +33,7 @@ function ChooseSettings(prop, choice) {
         <div class="btn-wrapper">
           <button @click="ChooseSettings('theme', 'numbers')" :class="{ active: settings.theme === 'numbers' }">Numbers</button>
           <button @click="ChooseSettings('theme', 'animals')" :class="{ active: settings.theme === 'animals' }">Animals</button>
+          <button @click="ChooseSettings('theme', 'monsters')" :class="{ active: settings.theme === 'monsters' }">Monsters</button>
         </div>
       </div>
       <div class="container">
@@ -122,12 +123,12 @@ h2 {
 }
 
 button {
-  font-size: 26px;
+  font-size: 22px;
   color: var(--clr-snow-white);
   font-weight: bold;
   border-radius: 6rem;
   background-color: var(--clr-light-grayish-blue);
-  padding: 0.15rem 2.4rem;
+  padding: 0.15rem 2rem;
   position: relative;
 }
 
