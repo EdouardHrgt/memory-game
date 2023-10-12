@@ -6,6 +6,7 @@ export function generateNumberGrid(x) {
 }
 
 import { animals } from '../composables/animals';
+
 export function generateAnimalGrid(x) {
   // take random animals on every generation
   const animalsList = animals();

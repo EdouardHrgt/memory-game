@@ -11,10 +11,28 @@ const router = useRouter();
 const settings = JSON.parse(route.query.params);
 const isMuted = ref(false);
 const grid = ref([]);
-const speed = ref(1000);
 const startTime = ref(0);
 const endTime = ref(false);
 const elapsedTime = ref(0);
+const isGameActive = ref(false);
+const isMenuOpen = ref(false);
+const createGrid = generateGrid(settings);
+const GenerateNumbers = generateNumberGrid();
+const generateAnimals = generateAnimalGrid();
+
+onMounted(() => {
+  // Auto Generate the Grid
+  grid.value = createGrid;
+  const soundPreference = localStorage.getItem('SoundPreference');
+});
+
+function toggleMenu() {
+  if (isMenuOpen.value == true) {
+    isMenuOpen.value = false;
+  } else if (isMenuOpen.value == false) {
+    isMenuOpen.value = true;
+  }
+}
 
 function timeSpent() {
   startTime.value = new Date().getTime();
@@ -36,11 +54,20 @@ function updateElapsedTime() {
 function formatTime(seconds, stop = false) {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
+  console.log(minutes + ' ***** ' + remainingSeconds);
   if (minutes === 0) {
     return `${remainingSeconds} s`;
   } else {
     return `${minutes} min ${remainingSeconds} s`;
   }
+}
+
+function resetTime() {
+  startTime.value = 0;
+  endTime.value = true;
+  elapsedTime.value = 0;
+  isGameActive.value = false;
+  updateElapsedTime();
 }
 
 function playSound(music) {
@@ -52,7 +79,6 @@ function playSound(music) {
 function toggleSound() {
   isMuted.value = !isMuted.value;
   localStorage.setItem('SoundPreference', isMuted.value);
-  console.log(localStorage.getItem('SoundPreference'));
 }
 
 function backHome() {
@@ -61,24 +87,16 @@ function backHome() {
 
 function restart() {
   hardReset();
+  resetTime();
   winningPairs.value = [];
   MovesCounter.value = 0;
   isWin.value = false;
+  toggleMenu();
 }
 
 function getImageUrl(name) {
   return new URL(`../assets/animals/${name}`, import.meta.url).href;
 }
-
-const createGrid = generateGrid(settings);
-const GenerateNumbers = generateNumberGrid();
-const generateAnimals = generateAnimalGrid();
-
-onMounted(() => {
-  // Générez la grille en fonction de settings
-  grid.value = createGrid;
-  const soundPreference = localStorage.getItem('SoundPreference');
-});
 
 function reset() {
   // mask all buttons content (default style)
@@ -117,21 +135,19 @@ function toggleVictory() {
     isWin.value = true;
     endTime.value = true;
     updateElapsedTime();
+    isGameActive.value = false;
   }
 }
-// Save clicked elements (max 2 per round)
+
 const clickedElements = ref([]);
-//Cancel the ability to clic on more than 2 button per rounds
 const isClickable = ref(true);
-//Stocking winning pairs
 const winningPairs = ref([]);
-//Counter of rounds
 const MovesCounter = ref(0);
-// Is the game winned ?
 const isWin = ref(false);
 
 function game(event, i) {
   //Disable click if 2 elements are already clicked
+  isGameActive.value = true;
   if (!isClickable.value) {
     return;
   }
@@ -173,7 +189,7 @@ function game(event, i) {
       }
 
       isClickable.value = true;
-    }, speed.value);
+    }, settings.speed);
   }
 }
 </script>
@@ -181,23 +197,21 @@ function game(event, i) {
 <template>
   <main>
     <header class="commands flex">
-      <div class="logo">
-        <svg width="150" height="28" xmlns="http://www.w3.org/2000/svg">
+      <svg width="150" height="28" xmlns="http://www.w3.org/2000/svg">
+        <path
+          d="M6.08 21V10.64c0-1.733.287-3.053.86-3.96s1.487-1.36 2.74-1.36c.96 0 1.647.233 2.06.7.413.467.667 1.087.76 1.86.093.773.14 1.627.14 2.56V21h6.12V10.52c0-1.733.28-3.033.84-3.9.56-.867 1.453-1.3 2.68-1.3.987 0 1.693.233 2.12.7.427.467.693 1.087.8 1.86.107.773.16 1.627.16 2.56V21h6.08V8.92c0-2.693-.48-4.753-1.44-6.18C29.04 1.313 27.293.6 24.76.6c-1.387 0-2.673.28-3.86.84a7.44 7.44 0 0 0-2.94 2.48c-.453-1.093-1.153-1.92-2.1-2.48C14.913.88 13.653.6 12.08.6c-1.467 0-2.72.347-3.76 1.04-1.04.693-1.787 1.413-2.24 2.16l-.76-2.64H0V21h6.08Zm39.2.48c1.627 0 3.22-.36 4.78-1.08 1.56-.72 2.86-1.84 3.9-3.36l-4.84-1.76c-.373.427-.9.78-1.58 1.06s-1.487.42-2.42.42c-1.12 0-2.14-.347-3.06-1.04-.92-.693-1.433-1.733-1.54-3.12H55.2c.133-2.347-.2-4.42-1-6.22-.8-1.8-1.98-3.213-3.54-4.24C49.1 1.113 47.227.6 45.04.6c-1.92 0-3.687.427-5.3 1.28a10.074 10.074 0 0 0-3.88 3.6c-.973 1.547-1.46 3.373-1.46 5.48 0 2.187.46 4.067 1.38 5.64a9.228 9.228 0 0 0 3.84 3.62c1.64.84 3.527 1.26 5.66 1.26ZM49.56 9h-9.04c.187-1.36.727-2.347 1.62-2.96.893-.613 1.913-.92 3.06-.92 1.173 0 2.187.327 3.04.98.853.653 1.293 1.62 1.32 2.9Zm14.6 12V10.64c0-1.733.287-3.053.86-3.96s1.487-1.36 2.74-1.36c.96 0 1.647.233 2.06.7.413.467.667 1.087.76 1.86.093.773.14 1.627.14 2.56V21h6.12V10.52c0-1.733.28-3.033.84-3.9.56-.867 1.453-1.3 2.68-1.3.987 0 1.693.233 2.12.7.427.467.693 1.087.8 1.86.107.773.16 1.627.16 2.56V21h6.08V8.92c0-2.693-.48-4.753-1.44-6.18C87.12 1.313 85.373.6 82.84.6c-1.387 0-2.673.28-3.86.84a7.44 7.44 0 0 0-2.94 2.48c-.453-1.093-1.153-1.92-2.1-2.48C72.993.88 71.733.6 70.16.6c-1.467 0-2.72.347-3.76 1.04-1.04.693-1.787 1.413-2.24 2.16l-.76-2.64h-5.32V21h6.08Zm38.84.48c1.813 0 3.52-.373 5.12-1.12 1.6-.747 2.893-1.9 3.88-3.46.987-1.56 1.48-3.527 1.48-5.9 0-2.4-.493-4.367-1.48-5.9-.987-1.533-2.28-2.667-3.88-3.4-1.6-.733-3.307-1.1-5.12-1.1-1.84 0-3.56.367-5.16 1.1-1.6.733-2.893 1.867-3.88 3.4-.987 1.533-1.48 3.5-1.48 5.9 0 2.373.493 4.34 1.48 5.9.987 1.56 2.28 2.713 3.88 3.46 1.6.747 3.32 1.12 5.16 1.12Zm0-4.72c-1.227 0-2.253-.44-3.08-1.32-.827-.88-1.24-2.36-1.24-4.44 0-2.107.42-3.58 1.26-4.42.84-.84 1.86-1.26 3.06-1.26 1.173 0 2.18.42 3.02 1.26.84.84 1.26 2.313 1.26 4.42 0 2.08-.407 3.56-1.22 4.44-.813.88-1.833 1.32-3.06 1.32ZM122.52 21V11c0-1.573.393-2.707 1.18-3.4.787-.693 1.913-1.04 3.38-1.04.293 0 .56.007.8.02.24.013.52.047.84.1V.6c-1.52-.08-2.813.2-3.88.84-1.067.64-1.907 1.76-2.52 3.36l-1.08-3.64h-4.8V21h6.08Zm11.36 6.44c1.733 0 3.107-.187 4.12-.56 1.013-.373 1.847-1.027 2.5-1.96s1.3-2.24 1.94-3.92l7.6-19.84h-6.52l-3.8 12.4-3.88-12.4h-6.52l7.6 19.72c-.213.667-.447 1.153-.7 1.46-.253.307-.607.5-1.06.58-.453.08-1.133.12-2.04.12h-1.2v4.4h1.96Z"
+          fill="rgb(252, 252, 252)"
+          fill-rule="nonzero"
+        />
+      </svg>
+      <button class="menu" @click="toggleMenu()"><h2>Menu</h2></button>
+      <div class="header-icons-btns flex" :class="{ 'active-menu': isMenuOpen }">
+        <svg width="26" height="26" xmlns="http://www.w3.org/2000/svg" class="close" @click="toggleMenu()">
           <path
-            d="M6.08 21V10.64c0-1.733.287-3.053.86-3.96s1.487-1.36 2.74-1.36c.96 0 1.647.233 2.06.7.413.467.667 1.087.76 1.86.093.773.14 1.627.14 2.56V21h6.12V10.52c0-1.733.28-3.033.84-3.9.56-.867 1.453-1.3 2.68-1.3.987 0 1.693.233 2.12.7.427.467.693 1.087.8 1.86.107.773.16 1.627.16 2.56V21h6.08V8.92c0-2.693-.48-4.753-1.44-6.18C29.04 1.313 27.293.6 24.76.6c-1.387 0-2.673.28-3.86.84a7.44 7.44 0 0 0-2.94 2.48c-.453-1.093-1.153-1.92-2.1-2.48C14.913.88 13.653.6 12.08.6c-1.467 0-2.72.347-3.76 1.04-1.04.693-1.787 1.413-2.24 2.16l-.76-2.64H0V21h6.08Zm39.2.48c1.627 0 3.22-.36 4.78-1.08 1.56-.72 2.86-1.84 3.9-3.36l-4.84-1.76c-.373.427-.9.78-1.58 1.06s-1.487.42-2.42.42c-1.12 0-2.14-.347-3.06-1.04-.92-.693-1.433-1.733-1.54-3.12H55.2c.133-2.347-.2-4.42-1-6.22-.8-1.8-1.98-3.213-3.54-4.24C49.1 1.113 47.227.6 45.04.6c-1.92 0-3.687.427-5.3 1.28a10.074 10.074 0 0 0-3.88 3.6c-.973 1.547-1.46 3.373-1.46 5.48 0 2.187.46 4.067 1.38 5.64a9.228 9.228 0 0 0 3.84 3.62c1.64.84 3.527 1.26 5.66 1.26ZM49.56 9h-9.04c.187-1.36.727-2.347 1.62-2.96.893-.613 1.913-.92 3.06-.92 1.173 0 2.187.327 3.04.98.853.653 1.293 1.62 1.32 2.9Zm14.6 12V10.64c0-1.733.287-3.053.86-3.96s1.487-1.36 2.74-1.36c.96 0 1.647.233 2.06.7.413.467.667 1.087.76 1.86.093.773.14 1.627.14 2.56V21h6.12V10.52c0-1.733.28-3.033.84-3.9.56-.867 1.453-1.3 2.68-1.3.987 0 1.693.233 2.12.7.427.467.693 1.087.8 1.86.107.773.16 1.627.16 2.56V21h6.08V8.92c0-2.693-.48-4.753-1.44-6.18C87.12 1.313 85.373.6 82.84.6c-1.387 0-2.673.28-3.86.84a7.44 7.44 0 0 0-2.94 2.48c-.453-1.093-1.153-1.92-2.1-2.48C72.993.88 71.733.6 70.16.6c-1.467 0-2.72.347-3.76 1.04-1.04.693-1.787 1.413-2.24 2.16l-.76-2.64h-5.32V21h6.08Zm38.84.48c1.813 0 3.52-.373 5.12-1.12 1.6-.747 2.893-1.9 3.88-3.46.987-1.56 1.48-3.527 1.48-5.9 0-2.4-.493-4.367-1.48-5.9-.987-1.533-2.28-2.667-3.88-3.4-1.6-.733-3.307-1.1-5.12-1.1-1.84 0-3.56.367-5.16 1.1-1.6.733-2.893 1.867-3.88 3.4-.987 1.533-1.48 3.5-1.48 5.9 0 2.373.493 4.34 1.48 5.9.987 1.56 2.28 2.713 3.88 3.46 1.6.747 3.32 1.12 5.16 1.12Zm0-4.72c-1.227 0-2.253-.44-3.08-1.32-.827-.88-1.24-2.36-1.24-4.44 0-2.107.42-3.58 1.26-4.42.84-.84 1.86-1.26 3.06-1.26 1.173 0 2.18.42 3.02 1.26.84.84 1.26 2.313 1.26 4.42 0 2.08-.407 3.56-1.22 4.44-.813.88-1.833 1.32-3.06 1.32ZM122.52 21V11c0-1.573.393-2.707 1.18-3.4.787-.693 1.913-1.04 3.38-1.04.293 0 .56.007.8.02.24.013.52.047.84.1V.6c-1.52-.08-2.813.2-3.88.84-1.067.64-1.907 1.76-2.52 3.36l-1.08-3.64h-4.8V21h6.08Zm11.36 6.44c1.733 0 3.107-.187 4.12-.56 1.013-.373 1.847-1.027 2.5-1.96s1.3-2.24 1.94-3.92l7.6-19.84h-6.52l-3.8 12.4-3.88-12.4h-6.52l7.6 19.72c-.213.667-.447 1.153-.7 1.46-.253.307-.607.5-1.06.58-.453.08-1.133.12-2.04.12h-1.2v4.4h1.96Z"
-            fill="rgb(252, 252, 252)"
-            fill-rule="nonzero"
+            d="M23.607.98l1.414 1.413L14.414 13l10.607 10.607-1.414 1.414L13 14.414 2.393 25.021.98 23.607 11.586 13 .98 2.393 2.393.98 13 11.586 23.607.98z"
+            fill-rule="evenodd"
           />
         </svg>
-        <div class="speed">
-          <input type="range" min="500" max="2000" name="speed" id="speed" v-model="speed" />
-          <label for="speed"
-            >round speed</label
-          >
-        </div>
-      </div>
-
-      <div class="header-icons-btns flex">
         <div class="btn-wrapper flex">
           <button class="restart" @click="restart()">Restart</button>
           <button class="new" @click="backHome()">New Game</button>
@@ -244,7 +258,8 @@ function game(event, i) {
         <p>{{ MovesCounter }}</p>
       </div>
       <div class="metrix flex-all timer">
-        <p>{{ formatTime(elapsedTime) }}</p>
+        <p v-show="isGameActive">{{ formatTime(elapsedTime) }}</p>
+        <h3 v-show="!isGameActive">Time</h3>
       </div>
     </footer>
   </main>
@@ -261,30 +276,41 @@ main {
 header {
   max-width: var(--max-w);
   margin-inline: auto;
-  padding: 6rem 0 4rem;
+  padding: 4rem 0 3rem;
   align-items: baseline;
   justify-content: flex-end;
   gap: 1rem;
 }
 
-.logo {
+header svg {
   margin-right: auto;
 }
 
-.speed {
-  margin-top: 0.5rem;
+.menu {
+  height: 3rem;
+  width: 9rem;
+  border-radius: 6rem;
+  display: none;
+  margin-left: auto;
+  background-color: var(--clr-orange);
 }
 
-.speed label {
-  display: block;
-  color: var(--clr-orange);
+.close {
+  display: none;
+}
+
+.menu h2 {
   font-size: 22px;
+  font-weight: bold;
+  color: var(--clr-snow-white);
 }
 
-label span {
-  font-size: 18px;
-  letter-spacing: 0.5px;
-  color: var(--clr-light-gray);
+.menu:hover {
+  background-color: var(--clr-snow-white);
+}
+
+.menu:hover h2 {
+  color: var(--clr-orange);
 }
 
 .header-icons-btns {
@@ -307,7 +333,7 @@ label span {
 .sound-icon {
   padding: 0;
   background: transparent;
-  width: 4.2rem;
+  width: 3.8rem;
   aspect-ratio: 1;
   transition: 0.3s ease-in-out;
 }
@@ -391,6 +417,7 @@ label span {
   position: relative;
   background-size: 72%;
   background-position: center;
+  animation: hide 0.4s ease-in-out forwards;
 }
 
 .grid-btn-img {
@@ -399,9 +426,8 @@ label span {
 
 .hidden {
   background-color: var(--clr-gray);
-  color: rgb(86, 97, 109);
-  /* color: transparent; */
-  animation: hide 0.4s ease-in-out forwards;
+  color: transparent;
+  /* animation: hide 0.4s ease-in-out forwards; */
   background-size: 0;
 }
 
@@ -441,7 +467,9 @@ footer {
 }
 
 h3 {
-  font-size: 1.7rem;
+  font-size: 1.6rem;
+  color: var(--clr-dark-gray);
+  animation: hide 0.4s ease-in-out;
 }
 
 footer p {
@@ -452,27 +480,9 @@ footer p {
 
 .timer p {
   font-size: 1.2rem;
-  color: black;
+  color: var(--clr-dark-gray);
   text-align: center;
   width: 100%;
-}
-
-@keyframes hide {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes modal {
-  from {
-    transform: scale(0);
-  }
-  to {
-    transform: scale(1);
-  }
 }
 
 @media screen and (max-width: 1440px) {
@@ -488,38 +498,81 @@ footer p {
 
 @media screen and (max-width: 800px) {
   header {
-    padding: 3rem 3rem 1rem;
-    flex-direction: column-reverse;
-    gap: 3rem;
+    padding: 3rem 1rem 3rem;
+    gap: 0;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
   }
   header svg {
-    margin: 0 auto;
+    margin: 0;
   }
+  .menu {
+    display: inline-block;
+  }
+
+  .close {
+    display: block;
+    fill: var(--clr-orange);
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    cursor: pointer;
+  }
+
+  .header-icons-btns {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    background: linear-gradient(180deg, rgb(21, 41, 56) 6%, rgba(21, 41, 56, 0.7) 94%);
+    z-index: 150;
+    display: none;
+    place-content: center;
+  }
+
+  .active-menu {
+    display: grid;
+    transform: translateX(1000px);
+    animation: pop 0.4s linear forwards;
+  }
+
+  .btn-wrapper {
+    flex-direction: column;
+    margin: auto;
+    gap: 2rem;
+  }
+
   .sound-icon {
-    width: 3.2rem;
+    margin: 2rem auto;
   }
+
+  .btn-wrapper button {
+    padding: 1rem 2rem;
+    font-size: 26px;
+    max-height: none;
+  }
+
+  .new {
+    background-color: var(--clr-dark-gray);
+    color: var(--clr-snow-white);
+  }
+
+  .restart:hover {
+    background-color: var(--clr-dark-gray);
+  }
+
   .grid {
-    padding: 1.5rem 0.5rem 0;
+    padding: 1.5rem 0.5rem 1rem;
     grid-column-gap: 1rem;
-    grid-row-gap: 1rem;
+    grid-row-gap: 1.5rem;
   }
 
-  .small-grid {
-    --btn-w: 70px;
-  }
-
-  .large-grid {
-    --btn-w: 48px;
-  }
   .grid-btn {
     font-size: 38px;
   }
-  .btn-wrapper button {
-    padding: 0.7rem 1.5rem;
-    font-size: 18px;
-  }
+
   footer {
-    padding: 2.3rem 0.5rem;
+    padding: 3rem 0.5rem 0;
   }
 
   .rounds {
@@ -528,11 +581,35 @@ footer p {
   }
 
   h3 {
-    font-size: 1.7rem;
+    font-size: 1.4rem;
   }
 
   footer p {
-    font-size: 1.7rem;
+    font-size: 1.3rem;
+  }
+}
+
+@media screen and (max-width: 525px) {
+  .small-grid {
+    --btn-w: 70px;
+  }
+
+  .large-grid {
+    --btn-w: 48px;
+  }
+}
+
+@media screen and (max-width: 420px) {
+  .grid {
+    grid-column-gap: 0.8rem;
+    grid-row-gap: 1rem;
+  }
+}
+
+@media screen and (max-width: 385px) {
+  .grid {
+    grid-column-gap: 0.5rem;
+    grid-row-gap: 1rem;
   }
 }
 </style>

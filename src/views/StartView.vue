@@ -5,6 +5,7 @@ const settings = ref({
   theme: 'numbers',
   players: 1,
   grid: 0,
+  speed: 1000,
 });
 
 const params = computed(() => {
@@ -31,9 +32,7 @@ function ChooseSettings(prop, choice) {
         <h2>Select Theme</h2>
         <div class="btn-wrapper">
           <button @click="ChooseSettings('theme', 'numbers')" :class="{ active: settings.theme === 'numbers' }">Numbers</button>
-          <button @click="ChooseSettings('theme', 'animals')" :class="{ active: settings.theme === 'animals' }">
-            Animals
-          </button>
+          <button @click="ChooseSettings('theme', 'animals')" :class="{ active: settings.theme === 'animals' }">Animals</button>
         </div>
       </div>
       <div class="container">
@@ -44,14 +43,26 @@ function ChooseSettings(prop, choice) {
         <div class="btn-wrapper">
           <button @click="ChooseSettings('players', 1)" :class="{ active: settings.players === 1 }">1</button>
           <button @click="ChooseSettings('players', 2)" :class="{ active: settings.players === 2 }">2</button>
-
         </div>
       </div>
       <div class="container">
         <h2>Grid Size</h2>
         <div class="btn-wrapper">
-          <button @click="ChooseSettings('grid', 0)" :class="{ active: settings.grid === 0 }">4*4</button>
-          <button @click="ChooseSettings('grid', 1)" :class="{ active: settings.grid === 1 }">6*6</button>
+          <button @click="ChooseSettings('grid', 0)" :class="{ active: settings.grid === 0 }">Small</button>
+          <button @click="ChooseSettings('grid', 1)" :class="{ active: settings.grid === 1 }">Large</button>
+        </div>
+      </div>
+      <div class="container">
+        <h2>Round speed</h2>
+        <div class="btn-wrapper">
+          <div class="speed">
+            <div class="speed-info-wrapper flex-all">
+              <p class="speed-infos">-</p>
+              <p class="speed-infos">+</p>
+            </div>
+            <input type="range" min="500" max="1750" name="speed" id="speed" v-model="settings.speed" />
+            <label for="speed" hidden>round speed</label>
+          </div>
         </div>
       </div>
 
@@ -134,6 +145,17 @@ button:hover {
   background-color: var(--clr-dark-gray);
 }
 
+.speed-info-wrapper {
+  width: var(--input-w);
+  margin-top: -0.8rem;
+}
+
+.speed-infos {
+  color: var(--clr-light-blue);
+  font-weight: bold;
+  font-size: 18px;
+}
+
 @media screen and (max-width: 1024px) {
   .card {
     min-width: 37rem;
@@ -148,7 +170,7 @@ button:hover {
   main {
     display: flex;
     flex-direction: column;
-    padding: 0 0.7rem;
+    padding: 0 1rem;
   }
   .card {
     min-width: 0;
@@ -161,7 +183,6 @@ button:hover {
   }
   button {
     font-size: 20px;
-
     padding: 0.15rem 1.7rem;
   }
 }
