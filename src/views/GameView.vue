@@ -12,6 +12,36 @@ const settings = JSON.parse(route.query.params);
 const isMuted = ref(false);
 const grid = ref([]);
 const speed = ref(1000);
+const startTime = ref(0);
+const endTime = ref(false);
+const elapsedTime = ref(0);
+
+function timeSpent() {
+  startTime.value = new Date().getTime();
+  endTime.value = false;
+  updateElapsedTime();
+}
+
+function updateElapsedTime() {
+  const intervalId = setInterval(() => {
+    const currentTime = new Date().getTime();
+    elapsedTime.value = Math.floor((currentTime - startTime.value) / 1000);
+
+    if (endTime.value === true) {
+      clearInterval(intervalId);
+    }
+  }, 1000);
+}
+
+function formatTime(seconds, stop = false) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  if (minutes === 0) {
+    return `${remainingSeconds} s`;
+  } else {
+    return `${minutes} min ${remainingSeconds} s`;
+  }
+}
 
 function playSound(music) {
   if (isMuted.value === true) return;
@@ -32,7 +62,7 @@ function backHome() {
 function restart() {
   hardReset();
   winningPairs.value = [];
-  counter.value = 0;
+  MovesCounter.value = 0;
   isWin.value = false;
 }
 
@@ -83,7 +113,11 @@ function addValidate(val) {
 }
 
 function toggleVictory() {
-  if (winningPairs.value.length === grid.value.length / 2) isWin.value = true;
+  if (winningPairs.value.length === grid.value.length / 2) {
+    isWin.value = true;
+    endTime.value = true;
+    updateElapsedTime();
+  }
 }
 // Save clicked elements (max 2 per round)
 const clickedElements = ref([]);
@@ -92,7 +126,7 @@ const isClickable = ref(true);
 //Stocking winning pairs
 const winningPairs = ref([]);
 //Counter of rounds
-const counter = ref(0);
+const MovesCounter = ref(0);
 // Is the game winned ?
 const isWin = ref(false);
 
@@ -100,6 +134,10 @@ function game(event, i) {
   //Disable click if 2 elements are already clicked
   if (!isClickable.value) {
     return;
+  }
+
+  if (startTime.value === 0) {
+    timeSpent();
   }
 
   playSound(clicSound);
@@ -115,7 +153,7 @@ function game(event, i) {
   // If player round completed, we block clicking event, Wait 1sec and hide buttons content again then allow a new round
   if (round) {
     isClickable.value = false;
-    counter.value++;
+    MovesCounter.value++;
     setTimeout(() => {
       const [element1, element2] = clickedElements.value;
 
@@ -154,7 +192,7 @@ function game(event, i) {
         <div class="speed">
           <input type="range" min="500" max="2000" name="speed" id="speed" v-model="speed" />
           <label for="speed"
-            >round speed: <span>{{ speed }}ms</span></label
+            >round speed</label
           >
         </div>
       </div>
@@ -164,10 +202,10 @@ function game(event, i) {
           <button class="restart" @click="restart()">Restart</button>
           <button class="new" @click="backHome()">New Game</button>
         </div>
-        <button v-if="isMuted === false" class="sound-icon" @click="toggleSound()">
+        <button v-show="isMuted === false" class="sound-icon" @click="toggleSound()">
           <img src="../assets/sound.png" alt="Sound On" />
         </button>
-        <button v-if="isMuted === true" class="sound-icon" @click="toggleSound()">
+        <button v-show="isMuted === true" class="sound-icon" @click="toggleSound()">
           <img src="../assets/no-sound.png" alt="Sound Off" />
         </button>
       </div>
@@ -201,9 +239,12 @@ function game(event, i) {
       </div>
     </section>
     <footer>
-      <div class="rounds">
-        <h3>Rounds</h3>
-        <p>{{ counter }}</p>
+      <div class="metrix flex-all">
+        <h3>Moves</h3>
+        <p>{{ MovesCounter }}</p>
+      </div>
+      <div class="metrix flex-all timer">
+        <p>{{ formatTime(elapsedTime) }}</p>
       </div>
     </footer>
   </main>
@@ -381,27 +422,39 @@ img {
 /*-- Footer --*/
 footer {
   background-color: var(--clr-dark-gray);
-  width: 100%;
   padding: 4rem 0;
+  max-width: var(--max-w);
+  margin-inline: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.2rem;
 }
 
-.rounds {
+.metrix {
   background-color: var(--clr-snow-white);
   border-radius: 10px;
-  padding: 1rem;
-  width: 15rem;
+  padding: 0 1rem;
   text-align: center;
-  margin-inline: auto;
+  width: 12rem;
+  height: 4rem;
 }
 
 h3 {
-  font-size: 2rem;
+  font-size: 1.7rem;
 }
 
 footer p {
   font-size: 1.5rem;
   font-weight: bold;
   color: var(--clr-orange);
+}
+
+.timer p {
+  font-size: 1.2rem;
+  color: black;
+  text-align: center;
+  width: 100%;
 }
 
 @keyframes hide {
@@ -441,6 +494,9 @@ footer p {
   }
   header svg {
     margin: 0 auto;
+  }
+  .sound-icon {
+    width: 3.2rem;
   }
   .grid {
     padding: 1.5rem 0.5rem 0;

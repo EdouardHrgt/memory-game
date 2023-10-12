@@ -75,6 +75,7 @@ input[type='range'] {
   background: transparent;
   cursor: pointer;
   width: 10rem;
+  transform: rotateY(180deg);
 }
 
 /* Removes default focus */
