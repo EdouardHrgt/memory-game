@@ -2,10 +2,12 @@
 import { ref, onMounted, computed } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import { generateGrid } from '../composables/gridGeneration';
+import { generatePlayers } from '../composables/generatePlayers';
 import clicSound from '../assets/audio/click.mp3';
 import WinSound from '../assets/audio/win.wav';
 import LooseSound from '../assets/audio/loose.mp3';
 import victorySound from '../assets/audio/victory.wav';
+import alertSound from '../assets/audio/alert.wav';
 import Loader from '../components/LoaderComponent.vue';
 
 const route = useRoute();
@@ -25,6 +27,7 @@ function restart() {
   toggleLoader();
   hardReset();
   resetTime();
+  resetPlayerScore();
   winningPairs.value = [];
   MovesCounter.value = 0;
   isWin.value = false;
@@ -155,23 +158,29 @@ const isClickable = ref(true);
 const winningPairs = ref([]);
 const MovesCounter = ref(0);
 const isWin = ref(false);
-
-const players = ref([
-  { name: 'Player 1', score: 0, moves: 0 },
-  { name: 'Player 2', score: 0, moves: 0 },
-]);
+const playersList = generatePlayers(settings.players);
+const players = ref(playersList);
+const toggleStyle = ref(0);
 
 let currentPlayerIndex = ref(0);
 
 function switchToNextPlayer() {
   currentPlayerIndex.value = (currentPlayerIndex.value + 1) % players.value.length;
+  toggleStyle.value = currentPlayerIndex.value % players.value.length;
 }
 
 function playerScore(score = 0) {
   players.value[currentPlayerIndex.value].moves += 1;
   if (score != 0) players.value[currentPlayerIndex.value].score += 1;
-  console.log('Moves: ' + players.value[currentPlayerIndex.value].moves + ' player number: ' + currentPlayerIndex.value);
   switchToNextPlayer();
+}
+
+function resetPlayerScore() {
+  toggleStyle.value = 0;
+  players.value.forEach((player) => {
+    player.moves = 0;
+    player.score = 0;
+  });
 }
 
 function game(event, i) {
@@ -201,8 +210,11 @@ function game(event, i) {
     MovesCounter.value++;
     setTimeout(() => {
       const [element1, element2] = clickedElements.value;
-
-      if (element1.value === element2.value) {
+      if (element1.index === element2.index) {
+        playSound(alertSound);
+        playerScore();
+        reset();
+      } else if (element1.value === element2.value) {
         // If the values match, apply the "validate" class and remove the "hidden" class
         playSound(WinSound);
         winningPairs.value.push(element1.value);
@@ -259,8 +271,6 @@ function game(event, i) {
         </button>
       </div>
     </header>
-    <h2>{{ players[0] }}</h2>
-    <h2>{{ players[1] }}</h2>
     <section>
       <div
         class="grid"
@@ -292,13 +302,28 @@ function game(event, i) {
       </div>
     </section>
     <footer>
-      <div class="metrix flex-all">
+      <!-- SOLO metrix -->
+      <div class="metrix flex-all" v-show="settings.players === 1">
         <h3>Moves</h3>
         <p class="scale-anim">{{ MovesCounter }}</p>
       </div>
-      <div class="metrix flex-all timer">
+      <div class="metrix flex-all timer" v-show="settings.players === 1">
         <p v-show="isGameActive" class="scale-anim">{{ formatTime(elapsedTime) }}</p>
         <h3 v-show="!isGameActive">Time</h3>
+      </div>
+      <!-- Multiplayer Metrix -->
+      <div class="multiplayer flex" v-show="settings.players > 1">
+        <div
+          class="metrix flex-all player"
+          v-for="(player, i) in players"
+          :key="i"
+          :class="{ 'active-player': toggleStyle == i }"
+        >
+          <h3>Player {{ i + 1 }}</h3>
+          <p class="scale-anim" :class="{ 'active-score': toggleStyle == i }">{{ player.score }}</p>
+          <div class="triangle" :class="{ 'active-triangle': toggleStyle == i }"></div>
+          <h4 :class="{ 'active-h4': toggleStyle == i }">Current turn</h4>
+        </div>
       </div>
     </footer>
   </main>
@@ -468,7 +493,7 @@ header svg {
 
 .hidden {
   background-color: var(--clr-gray);
-  color: transparent;
+  color: lightgoldenrodyellow;
   background-size: 0;
 }
 
@@ -528,6 +553,61 @@ footer p {
 
 .scale-anim {
   animation: modal 0.4s forwards;
+}
+
+.multiplayer {
+  gap: 1rem;
+}
+
+.player {
+  position: relative;
+}
+
+.triangle {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  content: '';
+  background: transparent;
+  width: 0;
+  height: 0;
+  border-left: 15px solid transparent;
+  border-right: 15px solid transparent;
+  border-bottom: 12px solid var(--clr-orange);
+  display: none;
+}
+
+h4 {
+  color: var(--clr-snow-white);
+  opacity: 0.9;
+  font-size: 16px;
+  text-transform: uppercase;
+  position: absolute;
+  bottom: -1.5rem;
+  text-align: center;
+  left: 0;
+  right: 0;
+  font-weight: normal;
+  letter-spacing: 1px;
+  animation: modal 0.5s forwards;
+  display: none;
+}
+
+.active-h4 {
+  display: inline-block;
+}
+
+.active-triangle {
+  display: inline-block;
+}
+
+.active-score {
+  color: var(--clr-snow-white);
+}
+
+.active-player {
+  background-color: var(--clr-orange);
 }
 
 @media screen and (max-width: 1440px) {

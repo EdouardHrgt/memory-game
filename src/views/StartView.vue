@@ -17,6 +17,7 @@ function ChooseSettings(prop, choice) {
   if (prop == 'players') settings.value.players = choice;
   if (prop == 'grid') settings.value.grid = choice;
 }
+
 </script>
 
 <template>
@@ -44,6 +45,8 @@ function ChooseSettings(prop, choice) {
         <div class="btn-wrapper">
           <button @click="ChooseSettings('players', 1)" :class="{ active: settings.players === 1 }">1</button>
           <button @click="ChooseSettings('players', 2)" :class="{ active: settings.players === 2 }">2</button>
+          <button @click="ChooseSettings('players', 3)" :class="{ active: settings.players === 3 }">3</button>
+          <button @click="ChooseSettings('players', 4)" :class="{ active: settings.players === 4 }">4</button>
         </div>
       </div>
       <div class="container">
