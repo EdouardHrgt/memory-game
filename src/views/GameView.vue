@@ -169,10 +169,10 @@ function switchToNextPlayer() {
   toggleStyle.value = currentPlayerIndex.value % players.value.length;
 }
 
-function playerScore(score = 0) {
+function playerScore(score = 0, next = true) {
   players.value[currentPlayerIndex.value].moves += 1;
   if (score != 0) players.value[currentPlayerIndex.value].score += 1;
-  switchToNextPlayer();
+  if (next) switchToNextPlayer();
 }
 
 function resetPlayerScore() {
@@ -221,7 +221,7 @@ function game(event, i) {
 
         addValidate(element1.value);
 
-        playerScore(1);
+        playerScore(1, false);
         // Check if the game is over
         toggleVictory();
         reset();
@@ -313,13 +313,9 @@ function game(event, i) {
       </div>
       <!-- Multiplayer Metrix -->
       <div class="multiplayer flex" v-show="settings.players > 1">
-        <div
-          class="metrix flex-all player"
-          v-for="(player, i) in players"
-          :key="i"
-          :class="{ 'active-player': toggleStyle == i }"
-        >
-          <h3>Player {{ i + 1 }}</h3>
+        <div class="flex player" v-for="(player, i) in players" :key="i" :class="{ 'active-player': toggleStyle == i }">
+          <h3 class="h3-desk">Player {{ i + 1 }}</h3>
+          <h3 class="h3-mobile">P {{ i + 1 }}</h3>
           <p class="scale-anim" :class="{ 'active-score': toggleStyle == i }">{{ player.score }}</p>
           <div class="triangle" :class="{ 'active-triangle': toggleStyle == i }"></div>
           <h4 :class="{ 'active-h4': toggleStyle == i }">Current turn</h4>
@@ -332,9 +328,9 @@ function game(event, i) {
 <style scoped>
 main {
   width: 100%;
-  min-height: 100dvh;
   --max-w: 950px;
   background-color: var(--clr-dark-gray);
+  padding: 2rem 0;
 }
 
 header {
@@ -493,7 +489,7 @@ header svg {
 
 .hidden {
   background-color: var(--clr-gray);
-  color: lightgoldenrodyellow;
+  color: transparent;
   background-size: 0;
 }
 
@@ -521,6 +517,7 @@ footer {
   justify-content: center;
   align-items: center;
   gap: 1.2rem;
+  margin-bottom: 2rem;
 }
 
 .metrix {
@@ -536,6 +533,22 @@ h3 {
   font-size: 1.6rem;
   color: var(--clr-dark-gray);
   animation: hide 0.4s ease-in-out;
+}
+
+.h3-mobile {
+  display: none;
+}
+
+.player {
+  position: relative;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--clr-snow-white);
+  border-radius: 10px;
+  padding: 0 1rem;
+  text-align: center;
+  width: 12rem;
+  height: 4rem;
 }
 
 footer p {
@@ -557,10 +570,6 @@ footer p {
 
 .multiplayer {
   gap: 1rem;
-}
-
-.player {
-  position: relative;
 }
 
 .triangle {
@@ -618,6 +627,32 @@ h4 {
     max-width: var(--max-w);
     margin-inline: auto;
     padding: 6rem 7vw 4rem;
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .player {
+    flex-direction: column;
+    padding: 1rem 1rem;
+    width: 5rem;
+    height: 5.5rem;
+  }
+  .h3-desk {
+    display: none;
+  }
+  .h3-mobile {
+    display: block;
+    letter-spacing: -1px;
+  }
+
+  h4 {
+    font-size: 14px;
+    bottom: -2.5rem;
+    letter-spacing: 1px;
+    display: none;
+  }
+  .multiplayer {
+    gap: 1.5rem;
   }
 }
 
@@ -721,12 +756,24 @@ h4 {
   .large-grid {
     --btn-w: 48px;
   }
+  .player {
+    padding: 1rem 0.5rem;
+  }
+  .multiplayer {
+    gap: 1rem;
+  }
+  footer {
+    margin-bottom: 6rem;
+  }
 }
 
 @media screen and (max-width: 420px) {
   .grid {
     grid-column-gap: 0.8rem;
     grid-row-gap: 1rem;
+  }
+  .triangle {
+    top: -10px;
   }
 }
 

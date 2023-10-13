@@ -40,7 +40,6 @@ function ChooseSettings(prop, choice) {
       <div class="container">
         <h2 class="flex-align">
           Numbers of Players
-          <p class="error">Not implemented</p>
         </h2>
         <div class="btn-wrapper">
           <button @click="ChooseSettings('players', 1)" :class="{ active: settings.players === 1 }">1</button>

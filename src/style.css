@@ -22,7 +22,9 @@
 }
 
 body {
-  overflow: hidden;
+  background-color: var(--clr-dark-gray);
+  height: max-content;
+  overflow: hidden
 }
 
 img {
