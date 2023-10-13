@@ -157,8 +157,8 @@ const MovesCounter = ref(0);
 const isWin = ref(false);
 
 const players = ref([
-  { name: 'Player 1', score: 0 },
-  { name: 'Player 2', score: 0 },
+  { name: 'Player 1', score: 0, moves: 0 },
+  { name: 'Player 2', score: 0, moves: 0 },
 ]);
 
 let currentPlayerIndex = ref(0);
@@ -167,9 +167,10 @@ function switchToNextPlayer() {
   currentPlayerIndex.value = (currentPlayerIndex.value + 1) % players.value.length;
 }
 
-function playerScore() {
-  players.value[currentPlayerIndex.value].score += 1;
-  console.log('Score: ' + players.value[currentPlayerIndex.value].score + ' player number: ' + currentPlayerIndex.value);
+function playerScore(score = 0) {
+  players.value[currentPlayerIndex.value].moves += 1;
+  if (score != 0) players.value[currentPlayerIndex.value].score += 1;
+  console.log('Moves: ' + players.value[currentPlayerIndex.value].moves + ' player number: ' + currentPlayerIndex.value);
   switchToNextPlayer();
 }
 
@@ -198,7 +199,6 @@ function game(event, i) {
   if (round) {
     isClickable.value = false;
     MovesCounter.value++;
-    playerScore();
     setTimeout(() => {
       const [element1, element2] = clickedElements.value;
 
@@ -208,11 +208,14 @@ function game(event, i) {
         winningPairs.value.push(element1.value);
 
         addValidate(element1.value);
+
+        playerScore(1);
         // Check if the game is over
         toggleVictory();
         reset();
       } else {
         playSound(LooseSound);
+        playerScore();
         // If the values don't match, hide the buttons again
         reset();
       }
@@ -256,6 +259,8 @@ function game(event, i) {
         </button>
       </div>
     </header>
+    <h2>{{ players[0] }}</h2>
+    <h2>{{ players[1] }}</h2>
     <section>
       <div
         class="grid"
@@ -464,7 +469,6 @@ header svg {
 .hidden {
   background-color: var(--clr-gray);
   color: transparent;
-  /* animation: hide 0.4s ease-in-out forwards; */
   background-size: 0;
 }
 

@@ -4,3 +4,15 @@
 // add new theme
 // Add 2 players
 // Metrix : average player speed round / comparison with others
+
+
+HelloWorld!
+
+I'm coding a Memory Game that display the time you're taking to finish the game. My code provided is just a more basic template of the feature I use, but it's a fairly similar use case.
+
+What Do I need?
+
+Display the formatted time on my html since you started a click interaction represented here by the startChrono() function.
+Automatically stop the time if you're not interacting for a period of time OR if the game is finished.
+Automatically resume the time if you interact again.
+resetting the time completely in the code and the DOM.
