@@ -26,6 +26,17 @@ export function generateMonstersGrid(x) {
   return shuffledValues;
 }
 
+export function generateThemeGrid(x, theme) {
+  let list;
+  if (theme === 'animals') list = animals();
+  if (theme === 'monsters') list = monsters();
+  const shuffleList = list.sort(() => Math.random() - 0.5);
+  const selectedObjects = shuffleList.slice(0, x);
+  const duplicateList = selectedObjects.flatMap((obj) => [obj, { ...obj }]);
+  const shuffledValues = duplicateList.sort(() => Math.random() - 0.5);
+  return shuffledValues;
+}
+
 export function generateGrid(settings) {
   let x;
   if (settings.theme === 'numbers') {
@@ -37,21 +48,12 @@ export function generateGrid(settings) {
     return generateNumberGrid(x);
   }
 
-  if (settings.theme === 'animals') {
+  if (settings.theme != 'numbers') {
     if (settings.grid == 0) {
       x = 8;
     } else if (settings.grid == 1) {
       x = 18;
     }
-    return generateAnimalGrid(x);
-  }
-
-  if (settings.theme === 'monsters') {
-    if (settings.grid == 0) {
-      x = 8;
-    } else if (settings.grid == 1) {
-      x = 18;
-    }
-    return generateMonstersGrid(x);
+    return generateThemeGrid(x, settings.theme);
   }
 }

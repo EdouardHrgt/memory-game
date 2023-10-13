@@ -61,7 +61,7 @@ function ChooseSettings(prop, choice) {
               <p class="speed-infos">-</p>
               <p class="speed-infos">+</p>
             </div>
-            <input type="range" min="500" max="1750" name="speed" id="speed" v-model="settings.speed" />
+            <input type="range" min="500" max="2000" name="speed" id="speed" v-model="settings.speed" />
             <label for="speed" hidden>round speed</label>
           </div>
         </div>
@@ -106,13 +106,14 @@ main {
 }
 
 .container {
-  margin-block: 2rem;
+  margin-block: 2.5rem;
 }
 
 .btn-wrapper {
   display: flex;
   align-items: center;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
 h2 {
@@ -185,6 +186,7 @@ button:hover {
   button {
     font-size: 20px;
     padding: 0.15rem 1.7rem;
+    margin-block: 0.2rem;
   }
 }
 </style>

@@ -155,23 +155,8 @@ const isClickable = ref(true);
 const winningPairs = ref([]);
 const MovesCounter = ref(0);
 const isWin = ref(false);
-
-const players = ref([
-  { name: 'Player 1', score: 0 },
-  { name: 'Player 2', score: 0 },
-]);
-
-let currentPlayerIndex = ref(0);
-
-function switchToNextPlayer() {
-  currentPlayerIndex.value = (currentPlayerIndex.value + 1) % players.value.length;
-}
-
-function playerScore() {
-  players.value[currentPlayerIndex.value].score += 1;
-  console.log('Score: ' + players.value[currentPlayerIndex.value].score + ' player number: ' + currentPlayerIndex.value);
-  switchToNextPlayer();
-}
+let accumulatedTime = 0;
+let pauseStartTime = 0;
 
 function game(event, i) {
   //Disable click if 2 elements are already clicked
@@ -198,7 +183,6 @@ function game(event, i) {
   if (round) {
     isClickable.value = false;
     MovesCounter.value++;
-    playerScore();
     setTimeout(() => {
       const [element1, element2] = clickedElements.value;
 

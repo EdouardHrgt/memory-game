@@ -1,12 +1,13 @@
 :root {
   --clr-snow-white: rgb(252, 252, 252);
+  --clr-trans-snow-white: rgba(252, 252, 252, 0.8);
   --clr-off-white: rgb(242, 242, 242);
   --clr-light-gray: rgb(188, 206, 217);
   --clr-light-grayish-blue: rgb(113, 145, 165);
   --clr-light-blue: rgb(99, 149, 184);
   --clr-gray: rgb(48, 72, 89);
   --clr-dark-gray: rgb(21, 41, 56);
-  --clr-trans-dark-gray: rgba(0, 0, 0, 0.7);
+  --clr-trans-dark-gray: rgba(0, 0, 0, 0.9);
   --clr-orange: rgb(253, 162, 20);
   --clr-trans-orange: rgba(253, 162, 20, 0.7);
   --input-w: 9rem;
@@ -18,6 +19,10 @@
   margin: 0;
   box-sizing: border-box;
   background-repeat: no-repeat;
+}
+
+body {
+  overflow: hidden;
 }
 
 img {
