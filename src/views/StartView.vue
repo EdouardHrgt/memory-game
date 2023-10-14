@@ -1,24 +1,36 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { textList } from '../composables/texts';
 
-const lang = ref(0);
+const lang = ref(null);
 const text = textList();
 const displayedTexts = ref(text);
 
+onMounted(() => {
+  const storedLang = localStorage.getItem('LANG')
+  if (storedLang) {
+    lang.value = +storedLang
+  } else {
+    localStorage.setItem('LANG', '0');
+    lang.value = 0
+  }
+});
+
 const language = computed(() => {
-  if (lang.value === 0) {
+  if (+lang.value === 0) {
     return displayedTexts.value[0][0];
   } else {
     return displayedTexts.value[0][1];
   }
 });
 
-const langSwitcher = () => {
-  if (lang.value == 0) {
+const langSwitcher = (int = false) => {
+  if (int) {
     lang.value = 1;
+    localStorage.setItem('LANG', '1');
   } else {
     lang.value = 0;
+    localStorage.setItem('LANG', '0');
   }
 };
 
@@ -56,7 +68,7 @@ function ChooseSettings(prop, choice) {
         <h2>{{ language.lang }}</h2>
         <div class="lang flex-align">
           <img src="../assets/en.png" alt="Set the game to English" class="lang-img" @click="langSwitcher()" />
-          <img src="../assets/fr.png" alt="Passez le jeu en Français" class="lang-img" @click="langSwitcher()" />
+          <img src="../assets/fr.png" alt="Passez le jeu en Français" class="lang-img" @click="langSwitcher(1)" />
         </div>
       </div>
       <div class="container">

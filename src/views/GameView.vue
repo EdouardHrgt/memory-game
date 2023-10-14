@@ -14,15 +14,6 @@ import { textList } from '../composables/texts';
 const lang = ref(0);
 const text = textList();
 const displayedTexts = ref(text);
-
-const language = computed(() => {
-  if (lang.value === 0) {
-    return displayedTexts.value[1][0];
-  } else {
-    return displayedTexts.value[1][1];
-  }
-});
-
 const route = useRoute();
 const router = useRouter();
 const settings = JSON.parse(route.query.params);
@@ -35,6 +26,15 @@ onMounted(() => {
   // Auto Generating the Grid
   grid.value = generateGrid(settings);
   lang.value = settings.lang;
+  lang.value = localStorage.getItem('LANG');
+});
+
+const language = computed(() => {
+  if (+lang.value === 0) {
+    return displayedTexts.value[1][0];
+  } else {
+    return displayedTexts.value[1][1];
+  }
 });
 
 function restart() {
@@ -343,11 +343,14 @@ function game(event, i) {
 main {
   width: 100%;
   --max-w: 950px;
+  min-height: 100dvh;
   background-color: var(--clr-dark-gray);
+  display: grid;
+  place-content: center;
 }
 
 header {
-  max-width: var(--max-w);
+  width: var(--max-w);
   margin-inline: auto;
   padding: 1rem 0 3rem;
   align-items: baseline;
@@ -634,16 +637,24 @@ h4 {
 
 @media screen and (max-width: 1440px) {
   main {
-    --max-w: 100%;
+    --max-w: 1024px;
   }
   header {
-    max-width: var(--max-w);
     margin-inline: auto;
     padding: 1rem 7vw 4rem;
   }
 }
 
+@media screen and (max-width: 1030px) {
+  main {
+    --max-w: 900px;
+  }
+}
+
 @media screen and (max-width: 900px) {
+  main {
+    --max-w: 800px;
+  }
   .player {
     flex-direction: column;
     padding: 1rem 1rem;
@@ -670,12 +681,14 @@ h4 {
 }
 
 @media screen and (max-width: 800px) {
+  main {
+    --max-w: 100%;
+  }
   header {
     padding: 1rem 1rem 3rem;
     gap: 0;
     align-items: center;
     justify-content: space-between;
-    width: 100%;
   }
   header svg {
     margin: 0;
