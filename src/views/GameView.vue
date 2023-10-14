@@ -9,6 +9,19 @@ import LooseSound from '../assets/audio/loose.mp3';
 import victorySound from '../assets/audio/victory.wav';
 import alertSound from '../assets/audio/alert.wav';
 import Loader from '../components/LoaderComponent.vue';
+import { textList } from '../composables/texts';
+
+const lang = ref(0);
+const text = textList();
+const displayedTexts = ref(text);
+
+const language = computed(() => {
+  if (lang.value === 0) {
+    return displayedTexts.value[1][0];
+  } else {
+    return displayedTexts.value[1][1];
+  }
+});
 
 const route = useRoute();
 const router = useRouter();
@@ -21,6 +34,7 @@ const isLoading = ref(false);
 onMounted(() => {
   // Auto Generating the Grid
   grid.value = generateGrid(settings);
+  lang.value = settings.lang;
 });
 
 function restart() {
@@ -260,8 +274,8 @@ function game(event, i) {
           />
         </svg>
         <div class="btn-wrapper flex">
-          <button class="restart" @click="restart()">Restart</button>
-          <button class="new" @click="backHome()">New Game</button>
+          <button class="restart" @click="restart()">{{ language.header[0] }}</button>
+          <button class="new" @click="backHome()">{{ language.header[1] }}</button>
         </div>
         <button v-show="isMuted === false" class="sound-icon" @click="toggleSound()">
           <img src="../assets/sound.png" alt="Sound On" />
@@ -304,21 +318,21 @@ function game(event, i) {
     <footer>
       <!-- SOLO metrix -->
       <div class="metrix flex-all" v-show="settings.players === 1">
-        <h3>Moves</h3>
+        <h3>{{ language.footer[0] }}</h3>
         <p class="scale-anim">{{ MovesCounter }}</p>
       </div>
       <div class="metrix flex-all timer" v-show="settings.players === 1">
         <p v-show="isGameActive" class="scale-anim">{{ formatTime(elapsedTime) }}</p>
-        <h3 v-show="!isGameActive">Time</h3>
+        <h3 v-show="!isGameActive">{{ language.footer[1] }}</h3>
       </div>
       <!-- Multiplayer Metrix -->
       <div class="multiplayer flex" v-show="settings.players > 1">
         <div class="flex player" v-for="(player, i) in players" :key="i" :class="{ 'active-player': toggleStyle == i }">
-          <h3 class="h3-desk">Player {{ i + 1 }}</h3>
+          <h3 class="h3-desk">{{ language.players }} {{ i + 1 }}</h3>
           <h3 class="h3-mobile">P {{ i + 1 }}</h3>
           <p class="scale-anim" :class="{ 'active-score': toggleStyle == i }">{{ player.score }}</p>
           <div class="triangle" :class="{ 'active-triangle': toggleStyle == i }"></div>
-          <h4 :class="{ 'active-h4': toggleStyle == i }">Current turn</h4>
+          <h4 :class="{ 'active-h4': toggleStyle == i }">{{ language.turn }}</h4>
         </div>
       </div>
     </footer>
@@ -330,13 +344,12 @@ main {
   width: 100%;
   --max-w: 950px;
   background-color: var(--clr-dark-gray);
-  padding: 2rem 0;
 }
 
 header {
   max-width: var(--max-w);
   margin-inline: auto;
-  padding: 4rem 0 3rem;
+  padding: 1rem 0 3rem;
   align-items: baseline;
   justify-content: flex-end;
   gap: 1rem;
@@ -626,7 +639,7 @@ h4 {
   header {
     max-width: var(--max-w);
     margin-inline: auto;
-    padding: 6rem 7vw 4rem;
+    padding: 1rem 7vw 4rem;
   }
 }
 
@@ -658,7 +671,7 @@ h4 {
 
 @media screen and (max-width: 800px) {
   header {
-    padding: 3rem 1rem 3rem;
+    padding: 1rem 1rem 3rem;
     gap: 0;
     align-items: center;
     justify-content: space-between;
@@ -732,6 +745,7 @@ h4 {
 
   footer {
     padding: 3rem 0.5rem 0;
+    margin-bottom: 0;
   }
 
   .rounds {
@@ -760,10 +774,16 @@ h4 {
     padding: 1rem 0.5rem;
   }
   .multiplayer {
-    gap: 1rem;
+    gap: 0;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 0.5rem;
   }
   footer {
-    margin-bottom: 6rem;
+    margin-bottom: 2rem;
+  }
+  header {
+    padding: 1rem 1rem 1rem;
   }
 }
 
@@ -782,136 +802,5 @@ h4 {
     grid-column-gap: 0.5rem;
     grid-row-gap: 1rem;
   }
-}
-
-@keyframes firework {
-  0% {
-    transform: translate(var(--x), var(--initialY));
-    width: var(--initialSize);
-    opacity: 1;
-  }
-  50% {
-    width: 0.5vmin;
-    opacity: 1;
-  }
-  100% {
-    width: var(--finalSize);
-    opacity: 0;
-  }
-}
-
-.firework,
-.firework::before,
-.firework::after {
-  --initialSize: 0.5vmin;
-  --finalSize: 45vmin;
-  --particleSize: 0.2vmin;
-  --color1: yellow;
-  --color2: khaki;
-  --color3: white;
-  --color4: lime;
-  --color5: gold;
-  --color6: mediumseagreen;
-  --y: -30vmin;
-  --x: -50%;
-  --initialY: 60vmin;
-  content: '';
-  animation: firework 2s 4;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, var(--y));
-  width: var(--initialSize);
-  aspect-ratio: 1;
-  background: radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 50% 0%,
-    radial-gradient(circle, var(--color2) var(--particleSize), #0000 0) 100% 50%,
-    radial-gradient(circle, var(--color3) var(--particleSize), #0000 0) 50% 100%,
-    radial-gradient(circle, var(--color4) var(--particleSize), #0000 0) 0% 50%,
-    /* bottom right */ radial-gradient(circle, var(--color5) var(--particleSize), #0000 0) 80% 90%,
-    radial-gradient(circle, var(--color6) var(--particleSize), #0000 0) 95% 90%,
-    radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 90% 70%,
-    radial-gradient(circle, var(--color2) var(--particleSize), #0000 0) 100% 60%,
-    radial-gradient(circle, var(--color3) var(--particleSize), #0000 0) 55% 80%,
-    radial-gradient(circle, var(--color4) var(--particleSize), #0000 0) 70% 77%,
-    /* bottom left */ radial-gradient(circle, var(--color5) var(--particleSize), #0000 0) 22% 90%,
-    radial-gradient(circle, var(--color6) var(--particleSize), #0000 0) 45% 90%,
-    radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 33% 70%,
-    radial-gradient(circle, var(--color2) var(--particleSize), #0000 0) 10% 60%,
-    radial-gradient(circle, var(--color3) var(--particleSize), #0000 0) 31% 80%,
-    radial-gradient(circle, var(--color4) var(--particleSize), #0000 0) 28% 77%,
-    radial-gradient(circle, var(--color5) var(--particleSize), #0000 0) 13% 72%,
-    /* top left */ radial-gradient(circle, var(--color6) var(--particleSize), #0000 0) 80% 10%,
-    radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 95% 14%,
-    radial-gradient(circle, var(--color2) var(--particleSize), #0000 0) 90% 23%,
-    radial-gradient(circle, var(--color3) var(--particleSize), #0000 0) 100% 43%,
-    radial-gradient(circle, var(--color4) var(--particleSize), #0000 0) 85% 27%,
-    radial-gradient(circle, var(--color5) var(--particleSize), #0000 0) 77% 37%,
-    radial-gradient(circle, var(--color6) var(--particleSize), #0000 0) 60% 7%,
-    /* top right */ radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 22% 14%,
-    radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 45% 20%,
-    radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 33% 34%,
-    radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 10% 29%,
-    radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 31% 37%,
-    radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 28% 7%,
-    radial-gradient(circle, var(--color1) var(--particleSize), #0000 0) 13% 42%;
-  background-size: var(--initialSize) var(--initialSize);
-  background-repeat: no-repeat;
-}
-
-.firework::before {
-  --x: -50%;
-  --y: -50%;
-  --initialY: -50%;
-  /*   transform: translate(-20vmin, -2vmin) rotate(40deg) scale(1.3) rotateY(40deg); */
-  transform: translate(-50%, -50%) rotate(40deg) scale(1.3) rotateY(40deg);
-  /*   animation: fireworkPseudo 2s infinite; */
-}
-
-.firework::after {
-  --x: -50%;
-  --y: -50%;
-  --initialY: -50%;
-  /*   transform: translate(44vmin, -50%) rotate(170deg) scale(1.15) rotateY(-30deg); */
-  transform: translate(-50%, -50%) rotate(170deg) scale(1.15) rotateY(-30deg);
-  /*   animation: fireworkPseudo 2s infinite; */
-}
-
-.firework:nth-child(2) {
-  --x: 30vmin;
-}
-
-.firework:nth-child(2),
-.firework:nth-child(2)::before,
-.firework:nth-child(2)::after {
-  --color1: pink;
-  --color2: violet;
-  --color3: fuchsia;
-  --color4: orchid;
-  --color5: plum;
-  --color6: lavender;
-  --finalSize: 40vmin;
-  left: 30%;
-  top: 60%;
-  animation-delay: -0.25s;
-}
-
-.firework:nth-child(3) {
-  --x: -30vmin;
-  --y: -50vmin;
-}
-
-.firework:nth-child(3),
-.firework:nth-child(3)::before,
-.firework:nth-child(3)::after {
-  --color1: cyan;
-  --color2: lightcyan;
-  --color3: lightblue;
-  --color4: PaleTurquoise;
-  --color5: SkyBlue;
-  --color6: lavender;
-  --finalSize: 35vmin;
-  left: 70%;
-  top: 60%;
-  animation-delay: -0.4s;
 }
 </style>
