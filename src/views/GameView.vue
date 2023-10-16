@@ -47,6 +47,7 @@ function restart() {
   isWin.value = false;
   isMenuOpen.value = false;
   grid.value = generateGrid(settings);
+  recapVictory.value = null;
 }
 
 function toggleMenu() {
@@ -160,10 +161,12 @@ function addValidate(val) {
 
 function toggleVictory() {
   if (winningPairs.value.length === grid.value.length / 2) {
-    isWin.value = true;
     endTime.value = true;
     updateElapsedTime();
+    isWin.value = true;
+    // recapVictory.value = players.value.sort((a, b) => b.score - a.score);
     playSound(victorySound);
+    // players.value = players.value.sort((a, b) => b.score - a.score);
   }
 }
 
@@ -229,15 +232,19 @@ function game(event, i) {
         playerScore();
         reset();
       } else if (element1.value === element2.value) {
-        // If the values match, apply the "validate" class and remove the "hidden" class
-        playSound(WinSound);
-        winningPairs.value.push(element1.value);
-
-        addValidate(element1.value);
-
-        playerScore(1, false);
-        // Check if the game is over
-        toggleVictory();
+        //If the pair clicked has already been won
+        if (winningPairs.value.includes(element1.value)) {
+          playSound(alertSound);
+          playerScore();
+        } else {
+          // If the values match, apply the "validate" class and remove the "hidden" class
+          playSound(WinSound);
+          winningPairs.value.push(element1.value);
+          addValidate(element1.value);
+          playerScore(1, false);
+          // Check if the game is over
+          toggleVictory();
+        }
         reset();
       } else {
         playSound(LooseSound);
@@ -254,9 +261,6 @@ function game(event, i) {
 
 <template>
   <main>
-    <div class="firework" v-show="isWin"></div>
-    <div class="firework" v-show="isWin"></div>
-    <div class="firework" v-show="isWin"></div>
     <header class="commands flex">
       <svg width="150" height="28" xmlns="http://www.w3.org/2000/svg">
         <path
@@ -285,6 +289,25 @@ function game(event, i) {
         </button>
       </div>
     </header>
+    <!-- VICTORY RECAP MODAL -->
+    <section class="vic-modal" v-show="isWin">
+      <div class="vic-container">
+        <h2>
+          Player <span class="vic-winner">{{ players[0].id }}</span> Wins!
+        </h2>
+        <p>Game over! Here are the results...</p>
+        <div class="vic-players">
+          <div class="vic-player flex-all" v-for="(gamer, i) in players" :key="gamer.id">
+            <h3>Player {{ gamer.id }} <span v-if="i === 0">(Winner)</span></h3>
+            <p>{{ gamer.score }} Pairs</p>
+          </div>
+        </div>
+        <div class="vic-btn flex-align">
+          <button class="vic-restart" id="victory-btn" @click="restart()">restart</button>
+          <button class="vic-new" @click="backHome()">New Game</button>
+        </div>
+      </div>
+    </section>
     <section>
       <div
         class="grid"
@@ -294,7 +317,6 @@ function game(event, i) {
         <button class="grid-btn hidden" v-for="(el, i) in grid" :key="i" :value="el" @click="game($event, i)">
           {{ el }}
         </button>
-        <div class="win-modal" v-show="isWin"></div>
         <Loader v-show="isLoading" />
       </div>
       <div
@@ -311,19 +333,20 @@ function game(event, i) {
           :style="{ backgroundImage: `url(${getImageUrl(settings.theme, el.img)})` }"
         ></button>
 
-        <div class="win-modal" v-show="isWin"></div>
         <Loader v-show="isLoading" />
       </div>
     </section>
     <footer>
       <!-- SOLO metrix -->
-      <div class="metrix flex-all" v-show="settings.players === 1">
-        <h3>{{ language.footer[0] }}</h3>
-        <p class="scale-anim">{{ MovesCounter }}</p>
-      </div>
-      <div class="metrix flex-all timer" v-show="settings.players === 1">
-        <p v-show="isGameActive" class="scale-anim">{{ formatTime(elapsedTime) }}</p>
-        <h3 v-show="!isGameActive">{{ language.footer[1] }}</h3>
+      <div class="solo-metrix-wrapper flex" v-show="settings.players === 1">
+        <div class="metrix flex-all">
+          <h3>{{ language.footer[0] }}</h3>
+          <p class="scale-anim">{{ MovesCounter }}</p>
+        </div>
+        <div class="metrix flex-all timer">
+          <p v-show="isGameActive" class="scale-anim">{{ formatTime(elapsedTime) }}</p>
+          <h3 v-show="!isGameActive">{{ language.footer[1] }}</h3>
+        </div>
       </div>
       <!-- Multiplayer Metrix -->
       <div class="multiplayer flex" v-show="settings.players > 1">
@@ -345,8 +368,6 @@ main {
   --max-w: 950px;
   min-height: 100dvh;
   background-color: var(--clr-dark-gray);
-  display: grid;
-  place-content: center;
 }
 
 header {
@@ -438,22 +459,8 @@ header svg {
   color: var(--clr-snow-white);
 }
 
-.win-modal {
-  background-color: var(--clr-dark-gray);
-  background-image: url('../assets/winer.png');
-  background-position: center;
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-content: center;
-  border-radius: 10px;
-  transition: 0.4s;
-}
-
-.win-modal h1 {
-  text-align: center;
-  font-size: 3.5rem;
-  color: var(--clr-orange);
+section {
+  position: relative;
 }
 
 .grid {
@@ -505,7 +512,7 @@ header svg {
 
 .hidden {
   background-color: var(--clr-gray);
-  color: transparent;
+  color: lightblue;
   background-size: 0;
 }
 
@@ -527,13 +534,20 @@ img {
 footer {
   background-color: var(--clr-dark-gray);
   padding: 4rem 0;
-  max-width: var(--max-w);
+  width: 100%;
   margin-inline: auto;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 1.2rem;
   margin-bottom: 2rem;
+}
+
+.solo-metrix-wrapper {
+  width: 100%;
+  justify-content: center;
+  gap: 1rem;
+  margin-inline: auto;
 }
 
 .metrix {
@@ -635,6 +649,93 @@ h4 {
   background-color: var(--clr-orange);
 }
 
+.vic-modal {
+  background-color: #f2f2f2;
+  padding: 1rem 2rem;
+  position: absolute;
+  inset: 1rem;
+  z-index: 10;
+  text-align: center;
+  overflow: hidden;
+}
+
+.vic-container {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.vic-modal h2 {
+  font-size: 48px;
+  color: var(--clr-dark-gray);
+  margin-bottom: 1rem;
+}
+
+.vic-winner {
+  color: var(--clr-orange);
+}
+
+.vic-player p,
+.vic-player h3 {
+  font-size: 18px;
+  color: var(--clr-light-grayish-blue);
+  font-weight: bold;
+}
+
+.vic-players {
+  margin-block: 1rem;
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.vic-player {
+  background-color: #dfe7ec;
+  padding: 0.5rem 2rem;
+  border-radius: 0.5rem;
+  margin-block: 1rem;
+}
+
+.vic-player p {
+  font-size: 28px;
+  font-weight: bold;
+  color: var(--clr-dark-gray);
+}
+
+.btn {
+  justify-content: center;
+}
+
+.vic-btn {
+  max-width: 40rem;
+  margin-inline: auto;
+}
+
+.vic-btn button {
+  font-size: 18px;
+  width: 100%;
+  font-weight: bold;
+  color: var(--clr-gray);
+  border-radius: 6rem;
+  background-color: #dfe7ec;
+  padding: 0.7rem 2rem;
+}
+
+.vic-new:hover {
+  background-color: var(--clr-light-blue);
+  color: var(--clr-snow-white);
+}
+
+#victory-btn {
+  color: var(--clr-snow-white);
+  background-color: var(--clr-orange);
+}
+
+#victory-btn:hover {
+  background-color: var(--clr-snow-white);
+  color: var(--clr-orange);
+}
+
 @media screen and (max-width: 1440px) {
   main {
     --max-w: 1024px;
@@ -684,17 +785,26 @@ h4 {
   main {
     --max-w: 100%;
   }
+
   header {
     padding: 1rem 1rem 3rem;
     gap: 0;
     align-items: center;
     justify-content: space-between;
   }
+
   header svg {
     margin: 0;
   }
+
   .menu {
     display: inline-block;
+    height: 3rem;
+    width: 6rem;
+  }
+
+  .menu h2 {
+    font-size: 18px;
   }
 
   .close {
@@ -797,6 +907,12 @@ h4 {
   }
   header {
     padding: 1rem 1rem 1rem;
+  }
+  .solo-metrix-wrapper {
+    gap: 0.5rem;
+  }
+  .metrix {
+    width: 100%;
   }
 }
 
