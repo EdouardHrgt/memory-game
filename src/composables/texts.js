@@ -24,12 +24,16 @@ export function textList() {
         footer: ['Moves', 'Time'],
         players: 'Player',
         turn: 'Current Turn',
+        victory: ['Victory', 'Winner', 'Game over! Here are the results...', 'Wins!'],
+        pairs: 'Pairs',
       },
       {
         header: ['Recommencer', 'Nouvelle Partie'],
         footer: ['Coups', 'Temps'],
         players: 'Joueur',
         turn: 'Tour Actuel',
+        victory: ['Victoire', 'Gagnant', 'La partie est terminée, voici le résultat...', 'Gagne !'],
+        pairs: 'Paires',
       },
     ],
   ];

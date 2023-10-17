@@ -167,7 +167,9 @@ function toggleVictory() {
     endTime.value = true;
     updateElapsedTime();
     isWin.value = true;
+    // recapVictory.value = players.value.sort((a, b) => b.score - a.score);
     playSound(victorySound);
+    // players.value = players.value.sort((a, b) => b.score - a.score);
   }
 }
 
@@ -654,9 +656,8 @@ h4 {
 }
 
 .vic-modal {
-  background-image: url('../assets/vic-bg.webp');
+  background-image: url('../assets/7363.jpg');
   background-size: cover;
-  background-color: var(--clr-dark-gray);
   padding: 1rem 2rem;
   position: absolute;
   inset: 0;
