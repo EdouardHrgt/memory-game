@@ -65,28 +65,23 @@ function toggleLoader() {
   }, 2000);
 }
 
-const startTime = ref(0);
-const endTime = ref(false);
-const elapsedTime = ref(0);
-const isGameActive = ref(false);
-const pausedTime = 5;
-let intervalId = null;
-let pauseTimestamp = null;
+const startTime = ref(0); // Initial timestamp
+const endTime = ref(false); // Stop the time
+const elapsedTime = ref(0); // Delta time since startTime (Formatted then displayed)
+const isGameActive = ref(false); // Toggle visible / hidden time metrix on html
+let deltaTime = 0;
 
-function timeSpent() {
+function StartTimer() {
   startTime.value = new Date().getTime();
   endTime.value = false;
   updateElapsedTime();
 }
 
 function updateElapsedTime() {
-  const intervalId = setInterval(() => {
+  deltaTime = setInterval(() => {
     const currentTime = new Date().getTime();
     elapsedTime.value = Math.floor((currentTime - startTime.value) / 1000);
-
-    if (endTime.value == true) {
-      clearInterval(intervalId);
-    }
+    if (endTime.value == true || elapsedTime.value > 600) clearInterval(deltaTime);
   }, 1000);
 }
 
@@ -209,9 +204,8 @@ function game(event, i) {
   }
 
   if (startTime.value === 0) {
-    timeSpent();
+    StartTimer();
   }
-
   playSound(clicSound);
 
   event.target.classList.remove('hidden');
@@ -919,7 +913,7 @@ h4 {
     margin-bottom: 2rem;
   }
   header {
-    padding: 1rem 1.5rem;
+    padding: 3rem 1.5rem;
   }
   .solo-metrix-wrapper {
     gap: 0.5rem;
