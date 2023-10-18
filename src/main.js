@@ -6,7 +6,6 @@ import Start from './views/StartView.vue';
 import Play from './views/GameView.vue';
 import Recap from './views/VictoryView.vue';
 import PageNotFound from './views/Error404.vue';
-import Timer from './views/ChronoTester.vue';
 
 import { createPinia } from 'pinia';
 
@@ -18,8 +17,7 @@ const router = createRouter({
     { path: '/', name: 'Start', component: Start },
     { path: '/play', name: 'Play', component: Play },
     { path: '/recap/:players', name: 'Recap', component: Recap },
-    { path: '/timer', name: 'Timer', component: Timer },
-    // { path: '/:pathMatch(*)*', name: 'PageNotFound', component: PageNotFound },
+    { path: '/:pathMatch(.*)*', name: 'PageNotFound', component: PageNotFound },
   ],
 });
 

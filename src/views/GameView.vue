@@ -252,6 +252,11 @@ function game(event, i) {
     }, settings.speed);
   }
 }
+
+const WhoWin = computed(() => {
+  const playersCopy = JSON.parse(JSON.stringify(players.value));
+  return playersCopy.slice().sort((a, b) => b.score - a.score);
+});
 </script>
 
 <template>
@@ -288,12 +293,12 @@ function game(event, i) {
     <section class="vic-modal" v-show="isWin">
       <div class="vic-container">
         <h2 v-show="+settings.players > 1">
-          {{ language.players }} <span class="vic-winner">{{ players[0].id }}</span> {{ language.victory[3] }}
+          {{ language.players }} <span class="vic-winner">{{ WhoWin[0].id }}</span> {{ language.victory[3] }}
         </h2>
         <h2 v-show="+settings.players == 1">{{ language.victory[0] }}</h2>
         <p>{{ language.victory[2] }}</p>
         <div class="vic-players">
-          <div class="vic-player flex-all" v-for="(gamer, i) in players" :key="gamer.id">
+          <div class="vic-player flex-all" v-for="(gamer, i) in WhoWin" :key="gamer.id">
             <h3>
               {{ language.players }}{{ gamer.id }} <span v-if="i === 0">({{ language.victory[1] }})</span>
             </h3>
@@ -510,7 +515,7 @@ section {
 
 .hidden {
   background-color: var(--clr-gray);
-  color: transparent;
+  color: lightcoral;
   background-size: 0;
 }
 
@@ -900,9 +905,11 @@ h4 {
   .large-grid {
     --btn-w: 48px;
   }
+
   .player {
     padding: 1rem 0.5rem;
   }
+
   .multiplayer {
     gap: 0;
     justify-content: space-between;
@@ -920,6 +927,36 @@ h4 {
   }
   .metrix {
     width: 100%;
+  }
+
+  .vic-modal {
+    padding: 1rem 0.5rem;
+  }
+
+  .vic-container {
+    padding: 1.5rem 1rem;
+    width: calc(100% - 1rem);
+  }
+
+  .vic-modal h2 {
+    font-size: 36px;
+  }
+
+  .vic-player p,
+  .vic-player h3 {
+    font-size: 16px;
+  }
+
+  .vic-player {
+    padding: 0.5rem 1.5rem;
+  }
+
+  .vic-player p {
+    font-size: 24px;
+  }
+
+  .vic-btn {
+    flex-direction: column;
   }
 }
 

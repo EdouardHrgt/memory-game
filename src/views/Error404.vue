@@ -11,6 +11,7 @@ function backHome() {
 
 <template>
   <main>
+    <p><strong>404</strong></p>
     <h1>Page not found...</h1>
     <button @click="backHome()">Back To Home</button>
   </main>
@@ -18,11 +19,11 @@ function backHome() {
 
 <style scoped>
 main {
-  display: grid;
-  place-content: center;
+  padding-top: 15vh;
 }
 
-h1 {
+h1,
+strong {
   font-size: 3.5rem;
   color: var(--clr-snow-white);
   width: 100%;
@@ -38,5 +39,11 @@ button {
   padding: 0.5rem 1rem;
   margin-inline: auto;
   margin-block: 1.5rem;
+}
+strong {
+  color: var(--clr-orange);
+}
+p {
+  text-align: center;
 }
 </style>
