@@ -32,16 +32,24 @@ img {
   height: auto;
 }
 
+h1 {
+  font-size: 44px;
+  color: var(--clr-snow-white);
+  letter-spacing: 1.5px;
+  margin-inline: auto;
+  padding: 2rem 0;
+  width: fit-content;
+}
+
+h1 span {
+  color: var(--clr-orange);
+}
+
 ul,
 li {
   list-style: none;
 }
 
-.error {
-  font-size: 13px;
-  color: rgb(255, 58, 58);
-  font-style: italic;
-}
 
 a {
   text-decoration: none;
